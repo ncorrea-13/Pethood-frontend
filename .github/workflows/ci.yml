@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, developer]
+  push:
+    branches: [main, developer]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Conflictos, compile y arranque
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verificar conflictos con la rama base
+        run: |
+          git fetch origin ${{ github.base_ref || 'main' }}
+          BASE_REF="${{ github.base_ref || 'main' }}"
+          git merge-tree "$(git merge-base HEAD origin/$BASE_REF)" HEAD "origin/$BASE_REF" > /tmp/merge-result.txt || true
+          if grep -q '<<<<<<<' /tmp/merge-result.txt; then
+            echo "::error::Hay conflictos de merge con origin/$BASE_REF"
+            cat /tmp/merge-result.txt
+            exit 1
+          fi
+          echo "Sin conflictos con origin/$BASE_REF"
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Verificar TypeScript (compila tipos)
+        run: npx tsc --noEmit
+
+      - name: Expo Doctor
+        run: npx expo-doctor
+
+      - name: Verificar que el proyecto puede exportar (build)
+        run: npx expo export --platform web --output-dir /tmp/expo-export
+
+      - name: Verificar que Metro puede levantar
+        run: |
+          npx expo start --non-interactive &
+          METRO_PID=$!
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8081/status >/dev/null 2>&1; then
+              echo "Metro levantó correctamente"
+              kill $METRO_PID || true
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Metro no respondió a tiempo"
+          kill $METRO_PID || true
+          exit 1
