@@ -38,20 +38,26 @@ jobs:
         with:
           node-version: "22"
           cache: "npm"
+          cache-dependency-path: apps/mobile/package-lock.json
 
       - name: Instalar dependencias
+        working-directory: apps/mobile
         run: npm ci
 
       - name: Verificar TypeScript (compila tipos)
+        working-directory: apps/mobile
         run: npx tsc --noEmit
 
       - name: Expo Doctor
+        working-directory: apps/mobile
         run: npx expo-doctor
 
       - name: Verificar que el proyecto puede exportar (build)
+        working-directory: apps/mobile
         run: npx expo export --platform web --output-dir /tmp/expo-export
 
       - name: Verificar que Metro puede levantar
+        working-directory: apps/mobile
         run: |
           npx expo start --non-interactive &
           METRO_PID=$!
