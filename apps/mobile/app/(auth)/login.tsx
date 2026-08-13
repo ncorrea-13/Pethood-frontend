@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -14,8 +14,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { PetHoodLogo } from '@/components/PetHoodLogo';
+import { useToast } from '@/components/feedback/Toast';
+import { useSesion } from '@/hooks/useSesion';
 
 export default function LoginScreen() {
+  const router = useRouter();
+  const toast = useToast();
+  const { iniciarSesion } = useSesion();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +54,12 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      // TODO: Integrar con el endpoint de autenticación del backend
+      await iniciarSesion(email.trim(), password);
+      router.replace('/(tabs)');
+    } catch (err) {
+      toast.mostrarError(
+        err instanceof Error ? err.message : 'No pudimos iniciar sesión. Revisá tu conexión.',
+      );
     } finally {
       setLoading(false);
     }
