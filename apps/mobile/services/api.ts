@@ -37,13 +37,16 @@ export function urlAbsoluta(ruta: string | null): string | null {
   return ruta.startsWith('http') ? ruta : `${URL_BASE}${ruta}`;
 }
 
+const MENSAJE_ERROR_GENERICO =
+  'No pudimos completar la acción. Revisá tu conexión e intentalo de nuevo.';
+
 async function procesarRespuesta<T>(respuesta: Response): Promise<T> {
   if (respuesta.ok) {
     return respuesta.status === 204 ? (undefined as T) : ((await respuesta.json()) as T);
   }
 
   let codigo = 'ERROR_DESCONOCIDO';
-  let mensaje = 'No pudimos completar la acción. Revisá tu conexión e intentalo de nuevo.';
+  let mensaje = MENSAJE_ERROR_GENERICO;
 
   try {
     const cuerpo = await respuesta.json();
@@ -81,14 +84,49 @@ export async function post<T>(ruta: string, cuerpo: unknown): Promise<T> {
   return procesarRespuesta<T>(respuesta);
 }
 
-/** POST multipart, para los formularios que llevan una imagen. */
+/**
+ * POST multipart. Usa XMLHttpRequest y no fetch: el fetch global de Expo pasa los archivos
+ * por base64 y corrompe la imagen. El XHR de React Native la sube directo desde su uri.
+ */
 export async function postFormData<T>(ruta: string, formData: FormData): Promise<T> {
-  const respuesta = await fetch(`${URL_BASE}/api/v1${ruta}`, {
-    method: 'POST',
-    // El Content-Type lo pone fetch con el boundary correcto: no setearlo a mano.
-    headers: await cabeceras(),
-    body: formData,
-  });
+  const token = await obtenerToken();
 
-  return procesarRespuesta<T>(respuesta);
+  return new Promise<T>((resolve, reject) => {
+    const peticion = new XMLHttpRequest();
+    peticion.open('POST', `${URL_BASE}/api/v1${ruta}`);
+
+    // El Content-Type con su boundary lo arma el XHR: no setearlo a mano.
+    if (token) peticion.setRequestHeader('Authorization', `Bearer ${token}`);
+
+    peticion.onload = () => {
+      const cuerpo = interpretarCuerpo(peticion.responseText);
+
+      if (peticion.status >= 200 && peticion.status < 300) {
+        resolve(cuerpo as T);
+        return;
+      }
+
+      const error = (cuerpo as { error?: { codigo?: string; mensaje?: string } })?.error;
+      reject(
+        new ApiError(
+          error?.mensaje ?? MENSAJE_ERROR_GENERICO,
+          error?.codigo ?? 'ERROR_DESCONOCIDO',
+          peticion.status,
+        ),
+      );
+    };
+
+    peticion.onerror = () =>
+      reject(new ApiError(MENSAJE_ERROR_GENERICO, 'ERROR_DE_RED', peticion.status));
+
+    peticion.send(formData);
+  });
+}
+
+function interpretarCuerpo(texto: string): unknown {
+  try {
+    return JSON.parse(texto);
+  } catch {
+    return null;
+  }
 }
