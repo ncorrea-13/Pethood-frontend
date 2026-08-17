@@ -121,7 +121,16 @@ Al abrir el proyecto, aceptá las recomendaciones de `../../.vscode/extensions.j
 
 ### 7. Variables de entorno
 
-Hoy **no hay** `.env` obligatorios. Cuando se integre el backend, se documentarán acá (por ejemplo `EXPO_PUBLIC_API_URL`) y se agregará un `.env.example` para que todos usen las mismas keys.
+Copiá `apps/mobile/.env.example` a `apps/mobile/.env`:
+
+```text
+EXPO_PUBLIC_API_URL="http://localhost:3000/api/v1"
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=""
+```
+
+- En emulador Android, `localhost` no llega a tu PC: usá `http://10.0.2.2:3000/api/v1`.
+- En un celular físico, usá la IP de tu máquina en la LAN (misma Wi‑Fi).
+- `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` es el Client ID tipo **Aplicación web** de Google Cloud. Sin eso, el botón de Google avisa que falta configurar.
 
 ---
 
