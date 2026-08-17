@@ -233,7 +233,7 @@ export default function CrearPublicacionScreen() {
                   <TextAreaField
                     label="Descripción para el swipe"
                     obligatorio
-                    placeholder="¿Por qué merece un hogar?"
+                    placeholder="Contá qué lo hace especial"
                     value={descripcion}
                     onChangeText={setDescripcion}
                     onBlur={() => marcarTocado('descripcion')}
@@ -272,7 +272,7 @@ export default function CrearPublicacionScreen() {
                 <FormCardRow>
                   <TagInputField
                     label="Requisitos de adoptante"
-                    placeholder="Opcional: presioná Enter para agregar"
+                    placeholder="Presioná Enter para agregar"
                     etiquetas={requisitos}
                     onChange={setRequisitos}
                     maximoPorEtiqueta={LIMITES.publicacion.requisito.max}

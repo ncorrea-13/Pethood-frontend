@@ -485,7 +485,7 @@ export default function CrearMascotaScreen() {
 
               <View className="mt-5 gap-3">
                 <CustomButton
-                  title={esRefugio ? 'Crear mascota' : 'Guardar mascota'}
+                  title="Crear mascota"
                   loading={guardando}
                   disabled={!formularioValido}
                   onPress={() => void guardar(false)}
@@ -493,7 +493,7 @@ export default function CrearMascotaScreen() {
                 />
 
                 <CustomButton
-                  title="Continuar: crear publicación"
+                  title="Continuar: Crear la publicación"
                   variant="secondary"
                   disabled={!formularioValido || !permitePublicar || guardando}
                   onPress={() => void guardar(true)}
