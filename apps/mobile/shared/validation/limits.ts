@@ -9,6 +9,8 @@ export const LIMITES = {
   mascota: {
     nombre: { min: 2, max: 25 },
     peso: { min: 0.1, max: 999.9, decimales: 1 },
+    /** Opcional. No confundir con la descripción de la publicación, que va aparte y es ≤50. */
+    descripcion: { max: 2000 },
   },
 
   publicacion: {

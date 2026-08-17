@@ -54,6 +54,20 @@ export function aFechaISO(fecha: Date): string {
   return `${anio}-${mes}-${dia}`;
 }
 
+/** Edad en texto a partir de la fecha de nacimiento: "3 años", "5 meses", "recién nacido". */
+export function edadEnTexto(fechaNacimiento: Date, hoy: Date = new Date()): string {
+  const meses =
+    (hoy.getFullYear() - fechaNacimiento.getFullYear()) * 12 +
+    (hoy.getMonth() - fechaNacimiento.getMonth()) -
+    (hoy.getDate() < fechaNacimiento.getDate() ? 1 : 0);
+
+  if (meses < 1) return 'Recién nacido';
+  if (meses < 12) return `${meses} ${meses === 1 ? 'mes' : 'meses'}`;
+
+  const anios = Math.floor(meses / 12);
+  return `${anios} ${anios === 1 ? 'año' : 'años'}`;
+}
+
 /** Formato para mostrar al usuario. */
 export function aFechaVisible(fecha: Date): string {
   const dia = String(fecha.getDate()).padStart(2, '0');
