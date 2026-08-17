@@ -1,8 +1,8 @@
 /** Selector cerrado: abre una hoja con las opciones y no admite texto libre. */
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { FlatList, Modal, Pressable, Text, View } from 'react-native';
-import { claseCaja, FormField } from './FormField';
+import { FlatList, Modal, Pressable, Text } from 'react-native';
+import { claseValor, FormField } from './FormField';
 
 export interface OpcionSelect<T> {
   valor: T;
@@ -17,6 +17,8 @@ interface SelectFieldProps<T> {
   onChange: (valor: T) => void;
   obligatorio?: boolean;
   error?: string;
+  /** Se avisa al cerrar el desplegable: es el equivalente a perder el foco de un input. */
+  onBlur?: () => void;
   /** Un selector dependiente queda inhabilitado hasta que se elige el campo del que depende. */
   deshabilitado?: boolean;
   textoDeshabilitado?: string;
@@ -30,6 +32,7 @@ export function SelectField<T extends string | number>({
   onChange,
   obligatorio,
   error,
+  onBlur,
   deshabilitado = false,
   textoDeshabilitado,
 }: SelectFieldProps<T>) {
@@ -37,6 +40,11 @@ export function SelectField<T extends string | number>({
 
   const seleccionada = opciones.find((opcion) => opcion.valor === valor);
   const textoVacio = deshabilitado && textoDeshabilitado ? textoDeshabilitado : placeholder;
+
+  const cerrar = (): void => {
+    setAbierto(false);
+    onBlur?.();
+  };
 
   return (
     <FormField label={label} obligatorio={obligatorio} error={error}>
@@ -46,26 +54,26 @@ export function SelectField<T extends string | number>({
         accessibilityState={{ disabled: deshabilitado, expanded: abierto }}
         disabled={deshabilitado}
         onPress={() => setAbierto(true)}
-        className={`${claseCaja(Boolean(error), deshabilitado)} flex-row items-center`}
+        className="flex-row items-center"
       >
         <Text
-          className={`flex-1 text-base ${seleccionada ? 'text-gray-800' : 'text-gray-400'}`}
+          className={`flex-1 ${claseValor(Boolean(error), !seleccionada)}`}
           numberOfLines={1}
         >
           {seleccionada?.etiqueta ?? textoVacio}
         </Text>
-        <Ionicons name="chevron-down" size={20} color={deshabilitado ? '#D1D5DB' : '#9CA3AF'} />
+        <Ionicons name="chevron-down" size={18} color={deshabilitado ? '#D1D5DB' : '#9CA3AF'} />
       </Pressable>
 
       <Modal
         visible={abierto}
         transparent
         animationType="fade"
-        onRequestClose={() => setAbierto(false)}
+        onRequestClose={cerrar}
       >
         <Pressable
           className="flex-1 justify-end bg-black/40"
-          onPress={() => setAbierto(false)}
+          onPress={cerrar}
           accessibilityRole="button"
           accessibilityLabel="Cerrar"
         >

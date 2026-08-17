@@ -5,10 +5,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { Platform, Pressable, Text, View } from 'react-native';
-import { aFechaVisible } from '../../shared/validation/dates';
+import { Platform, Pressable, Text } from 'react-native';
+import { aFechaVisible, edadEnTexto } from '../../shared/validation/dates';
 import { LIMITES } from '../../shared/validation/limits';
-import { claseCaja, FormField } from './FormField';
+import { claseValor, FormField } from './FormField';
 
 interface DateFieldProps {
   label: string;
@@ -17,6 +17,8 @@ interface DateFieldProps {
   onChange: (fecha: Date) => void;
   obligatorio?: boolean;
   error?: string;
+  /** Se avisa al cerrar el calendario: equivale a perder el foco de un input. */
+  onBlur?: () => void;
 }
 
 export function DateField({
@@ -26,48 +28,58 @@ export function DateField({
   onChange,
   obligatorio,
   error,
+  onBlur,
 }: DateFieldProps) {
   const [abierto, setAbierto] = useState(false);
 
+  const cerrar = (): void => {
+    setAbierto(false);
+    onBlur?.();
+  };
+
   return (
-    <FormField label={label} obligatorio={obligatorio} error={error}>
+    <FormField
+      label={label}
+      obligatorio={obligatorio}
+      error={error}
+      // El diseño muestra la edad; se calcula de la fecha en vez de pedirla aparte.
+      ayuda={valor ? edadEnTexto(valor) : undefined}
+    >
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${label}. ${valor ? aFechaVisible(valor) : 'sin elegir'}`}
         onPress={() => setAbierto(true)}
-        className={`${claseCaja(Boolean(error))} flex-row items-center`}
+        className="flex-row items-center"
       >
-        <Text className={`flex-1 text-base ${valor ? 'text-gray-800' : 'text-gray-400'}`}>
+        <Text className={`flex-1 ${claseValor(Boolean(error), !valor)}`}>
           {valor ? aFechaVisible(valor) : placeholder}
         </Text>
-        <Ionicons name="calendar-outline" size={20} color="#9CA3AF" />
+        <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
       </Pressable>
 
+      {/* En Android es un diálogo y no ocupa lugar; en iOS se muestra embebido y necesita
+          su propio botón para cerrarse. */}
       {abierto ? (
-        <View>
+        <>
           <DateTimePicker
             value={valor ?? new Date()}
             mode="date"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             maximumDate={new Date()}
             minimumDate={new Date(LIMITES.fecha.anioMinimo, 0, 1)}
-            onChange={(evento, fecha) => {
-              // En Android el calendario se cierra solo; en iOS queda abierto.
-              if (Platform.OS === 'android') setAbierto(false);
-              if (evento.type === 'set' && fecha) onChange(fecha);
+            onValueChange={(_evento, fecha) => {
+              if (Platform.OS === 'android') cerrar();
+              if (fecha) onChange(fecha);
             }}
+            onDismiss={cerrar}
           />
 
           {Platform.OS === 'ios' ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setAbierto(false)}
-              className="items-center py-2"
-            >
+            <Pressable accessibilityRole="button" onPress={cerrar} className="items-center py-2">
               <Text className="text-base font-semibold text-pethood-orange">Listo</Text>
             </Pressable>
           ) : null}
-        </View>
+        </>
       ) : null}
     </FormField>
   );

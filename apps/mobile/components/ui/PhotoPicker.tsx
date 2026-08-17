@@ -37,6 +37,12 @@ function tipoDesdeUri(uri: string): string {
   return 'image/jpeg';
 }
 
+/** Algunos dispositivos Android devuelven 'image/jpg', que no es un MIME type real. */
+function normalizarTipo(tipo: string): string {
+  const minuscula = tipo.toLowerCase().trim();
+  return minuscula === 'image/jpg' ? 'image/jpeg' : minuscula;
+}
+
 export function PhotoPicker({ foto, onChange, error }: PhotoPickerProps) {
   const [cargando, setCargando] = useState(false);
 
@@ -44,7 +50,7 @@ export function PhotoPicker({ foto, onChange, error }: PhotoPickerProps) {
     if (resultado.canceled || !resultado.assets[0]) return;
 
     const asset = resultado.assets[0];
-    const tipo = asset.mimeType ?? tipoDesdeUri(asset.uri);
+    const tipo = normalizarTipo(asset.mimeType ?? tipoDesdeUri(asset.uri));
 
     if (!LIMITES.imagen.formatos.includes(tipo as never)) {
       Alert.alert(
@@ -108,16 +114,12 @@ export function PhotoPicker({ foto, onChange, error }: PhotoPickerProps) {
   };
 
   return (
-    <View className="mb-5">
-      <Text className="mb-1.5 text-sm text-gray-700">
-        Foto de la mascota<Text className="text-red-500"> *</Text>
-      </Text>
-
+    <View className="mb-4">
       {foto ? (
-        <View className="relative self-start">
+        <View className="relative">
           <Image
             source={{ uri: foto.uri }}
-            className="h-40 w-40 rounded-2xl"
+            className="h-44 w-full rounded-3xl"
             accessibilityLabel="Vista previa de la foto elegida"
           />
 
@@ -126,7 +128,7 @@ export function PhotoPicker({ foto, onChange, error }: PhotoPickerProps) {
             accessibilityLabel="Quitar la foto"
             onPress={() => onChange(null)}
             hitSlop={8}
-            className="absolute -right-2 -top-2 h-9 w-9 items-center justify-center rounded-full bg-red-500 shadow-lg active:opacity-80"
+            className="absolute right-3 top-3 h-9 w-9 items-center justify-center rounded-full bg-black/50 active:opacity-80"
           >
             <Ionicons name="close" size={20} color="#FFFFFF" />
           </Pressable>
@@ -134,28 +136,28 @@ export function PhotoPicker({ foto, onChange, error }: PhotoPickerProps) {
           <Pressable
             accessibilityRole="button"
             onPress={elegir}
-            className="mt-2 items-center rounded-xl bg-gray-100 py-2 active:opacity-80"
+            className="absolute bottom-3 right-3 flex-row items-center gap-1.5 rounded-full bg-black/50 px-3 py-2 active:opacity-80"
           >
-            <Text className="text-sm font-medium text-gray-700">Cambiar foto</Text>
+            <Ionicons name="camera-outline" size={16} color="#FFFFFF" />
+            <Text className="text-xs font-medium text-white">Cambiar</Text>
           </Pressable>
         </View>
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Agregar foto"
+          accessibilityLabel="Agregar fotos"
           onPress={elegir}
           disabled={cargando}
-          className={`h-40 items-center justify-center rounded-2xl border-2 border-dashed ${
-            error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-pethood-input'
+          className={`h-32 items-center justify-center rounded-3xl border-2 border-dashed ${
+            error ? 'border-red-300 bg-red-50' : 'border-pethood-orange/40 bg-white/60'
           }`}
         >
           {cargando ? (
             <ActivityIndicator color="#FF9D5C" />
           ) : (
             <>
-              <Ionicons name="camera-outline" size={32} color="#9CA3AF" />
-              <Text className="mt-2 text-base font-medium text-gray-600">Agregar foto</Text>
-              <Text className="mt-0.5 text-xs text-gray-400">JPG, PNG o WEBP, hasta 5 MB</Text>
+              <Ionicons name="camera-outline" size={28} color="#FF9D5C" />
+              <Text className="mt-1.5 text-sm font-medium text-gray-500">Agregar fotos</Text>
             </>
           )}
         </Pressable>
