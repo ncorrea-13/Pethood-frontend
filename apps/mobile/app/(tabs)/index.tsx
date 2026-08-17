@@ -5,10 +5,11 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { EstadoMascotaBadge } from '@/components/ui/EstadoMascotaBadge';
 import { useSesion } from '@/hooks/useSesion';
 import { urlAbsoluta } from '@/services/api';
 import { listarMisMascotas, type Mascota } from '@/services/mascotas';
-import { aFechaVisible, parsearFecha } from '@/shared/validation/dates';
+import { edadEnTexto, parsearFecha } from '@/shared/validation/dates';
 
 const ETIQUETA_TAMANIO = {
   PEQUENO: 'Pequeño',
@@ -16,14 +17,9 @@ const ETIQUETA_TAMANIO = {
   GRANDE: 'Grande',
 } as const;
 
-/** Los estados llegan del catálogo con guiones bajos. */
-function etiquetaEstado(nombre: string): string {
-  return nombre.replace(/_/g, ' ');
-}
-
 function edad(fechaNacimiento: string | null): string | null {
   const fecha = parsearFecha(fechaNacimiento);
-  return fecha ? aFechaVisible(fecha) : null;
+  return fecha ? edadEnTexto(fecha) : null;
 }
 
 function TarjetaMascota({ mascota }: { mascota: Mascota }) {
@@ -41,22 +37,18 @@ function TarjetaMascota({ mascota }: { mascota: Mascota }) {
 
       <View className="flex-1 justify-center">
         <Text className="text-base font-bold text-gray-900">{mascota.nombre}</Text>
-        <Text className="mt-0.5 text-sm text-gray-600">
-          {mascota.especie.nombre} · {mascota.raza.nombre}
-        </Text>
-        <Text className="mt-0.5 text-sm text-gray-600">
-          {mascota.genero === 'MACHO' ? 'Macho' : 'Hembra'}
-          {mascota.tamanio ? ` · ${ETIQUETA_TAMANIO[mascota.tamanio]}` : ''}
-          {mascota.peso === null ? '' : ` · ${mascota.peso} kg`}
+        <Text className="mt-0.5 text-sm text-gray-500">
+          {[
+            mascota.especie.nombre,
+            edad(mascota.fechaNacimiento),
+            mascota.tamanio ? ETIQUETA_TAMANIO[mascota.tamanio] : null,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
         </Text>
 
-        <View className="mt-2 flex-row items-center gap-2">
-          <View className="self-start rounded-full border border-orange-100 bg-orange-50 px-2 py-1">
-            <Text className="text-xs text-orange-700">{etiquetaEstado(mascota.estado.nombre)}</Text>
-          </View>
-          {edad(mascota.fechaNacimiento) ? (
-            <Text className="text-xs text-gray-400">{edad(mascota.fechaNacimiento)}</Text>
-          ) : null}
+        <View className="mt-2">
+          <EstadoMascotaBadge estado={mascota.estado.nombre} />
         </View>
       </View>
     </View>

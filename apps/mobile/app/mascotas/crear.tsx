@@ -32,6 +32,7 @@ import { SelectField, type OpcionSelect } from '@/components/ui/SelectField';
 import { TextAreaField } from '@/components/ui/TextAreaField';
 import { TextField } from '@/components/ui/TextField';
 import { ToggleField } from '@/components/ui/ToggleField';
+import { estiloDeEstado } from '@/constants/EstadosMascota';
 import { useSesion } from '@/hooks/useSesion';
 import {
   listarEspecies,
@@ -444,7 +445,7 @@ export default function CrearMascotaScreen() {
                       obligatorio
                       opciones={estados.map((estado) => ({
                         valor: estado.id,
-                        etiqueta: estado.nombre.replace(/_/g, ' '),
+                        etiqueta: estiloDeEstado(estado.nombre).etiqueta,
                       }))}
                       valor={estadoMascotaId}
                       onChange={(nuevo) => {

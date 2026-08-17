@@ -28,6 +28,7 @@ import { TagInputField } from '@/components/ui/TagInputField';
 import { TextAreaField } from '@/components/ui/TextAreaField';
 import { TextField } from '@/components/ui/TextField';
 import { ToggleField } from '@/components/ui/ToggleField';
+import { estiloDeEstado } from '@/constants/EstadosMascota';
 import { crearPublicacion, listarMisMascotas, type Mascota } from '@/services/mascotas';
 import { LIMITES } from '@/shared/validation/limits';
 import { validarTexto } from '@/shared/validation/text';
@@ -219,7 +220,7 @@ export default function CrearPublicacionScreen() {
                     }
                     opciones={publicables.map((mascota) => ({
                       valor: mascota.id,
-                      etiqueta: `${mascota.nombre} (${mascota.especie.nombre} · ${mascota.estado.nombre.replace(/_/g, ' ')})`,
+                      etiqueta: `${mascota.nombre} (${mascota.especie.nombre} · ${estiloDeEstado(mascota.estado.nombre).etiqueta})`,
                     }))}
                     valor={mascotaId}
                     onChange={setMascotaId}
