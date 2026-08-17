@@ -2,10 +2,6 @@
   "name": "pethood-frontend",
   "main": "expo-router/entry",
   "version": "1.0.0",
-  "engines": {
-    "node": "^22.13.0",
-    "npm": ">=10"
-  },
   "packageManager": "npm@10.9.2",
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
