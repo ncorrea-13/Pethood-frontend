@@ -65,14 +65,24 @@ function TarjetaMascota({ mascota }: { mascota: Mascota }) {
 
 function ListaVacia() {
   return (
-    <View className="items-center px-6 py-16">
-      <View className="mb-4 h-20 w-20 items-center justify-center rounded-full bg-gray-100">
-        <Ionicons name="paw-outline" size={40} color="#9CA3AF" />
+    <View className="items-center px-8 py-16">
+      <View className="mb-5 h-24 w-24 items-center justify-center rounded-full bg-white">
+        <Ionicons name="paw-outline" size={44} color="#FF9D5C" />
       </View>
-      <Text className="text-center text-base text-gray-600">Todavía no cargaste ninguna mascota</Text>
-      <Text className="mt-1 text-center text-sm text-gray-400">
-        Tocá el botón naranja para agregar la primera
+
+      <Text className="text-center text-lg font-bold text-gray-900">
+        Todavía no tenés ninguna mascota
       </Text>
+      <Text className="mt-2 text-center text-base leading-6 text-gray-500">
+        Registrá la primera para tenerla en tu perfil o para publicarla en adopción.
+      </Text>
+
+      <View className="mt-5 flex-row items-center gap-2 rounded-full bg-white px-4 py-2.5">
+        <View className="h-7 w-7 items-center justify-center rounded-full bg-pethood-orange">
+          <Ionicons name="add" size={18} color="#FFFFFF" />
+        </View>
+        <Text className="text-sm text-gray-600">Tocá el botón para empezar</Text>
+      </View>
     </View>
   );
 }
