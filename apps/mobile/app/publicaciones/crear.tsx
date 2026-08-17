@@ -272,7 +272,7 @@ export default function CrearPublicacionScreen() {
                 <FormCardRow>
                   <TagInputField
                     label="Requisitos de adoptante"
-                    placeholder="Presioná Enter para agregar"
+                    placeholder="Ej. Casa con patio"
                     etiquetas={requisitos}
                     onChange={setRequisitos}
                     maximoPorEtiqueta={LIMITES.publicacion.requisito.max}

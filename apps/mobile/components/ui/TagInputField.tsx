@@ -1,4 +1,4 @@
-/** Etiquetas libres: se escribe una y se confirma con Enter. Cada una se puede quitar. */
+/** Etiquetas libres: se escribe una y se confirma con el botón o con Enter. */
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
@@ -54,20 +54,40 @@ export function TagInputField({
 
   return (
     <FormField label={label} error={error ?? errorLocal ?? undefined}>
-      <TextInput
-        className={`${claseValor(Boolean(error ?? errorLocal), !borrador)} p-0`}
-        placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
-        value={borrador}
-        onChangeText={(texto) => {
-          setBorrador(texto);
-          setErrorLocal(null);
-        }}
-        onSubmitEditing={agregar}
-        blurOnSubmit={false}
-        returnKeyType="done"
-        maxLength={maximoPorEtiqueta}
-      />
+      {/* Botón visible además del Enter: no todos los teclados de celular lo muestran. */}
+      <View className="flex-row items-center gap-2">
+        <TextInput
+          className={`flex-1 ${claseValor(Boolean(error ?? errorLocal), !borrador)} p-0`}
+          placeholder={placeholder}
+          placeholderTextColor="#9CA3AF"
+          value={borrador}
+          onChangeText={(texto) => {
+            setBorrador(texto);
+            setErrorLocal(null);
+          }}
+          onSubmitEditing={agregar}
+          blurOnSubmit={false}
+          returnKeyType="done"
+          maxLength={maximoPorEtiqueta}
+        />
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Agregar a la lista"
+          disabled={!borrador.trim()}
+          onPress={agregar}
+          className={`flex-row items-center gap-1 rounded-full px-3 py-1.5 ${
+            borrador.trim() ? 'bg-pethood-orange active:opacity-80' : 'bg-gray-100'
+          }`}
+        >
+          <Ionicons name="add" size={15} color={borrador.trim() ? '#FFFFFF' : '#9CA3AF'} />
+          <Text
+            className={`text-xs font-semibold ${borrador.trim() ? 'text-white' : 'text-gray-400'}`}
+          >
+            Agregar
+          </Text>
+        </Pressable>
+      </View>
 
       {etiquetas.length > 0 ? (
         <View className="mt-2 flex-row flex-wrap gap-2">

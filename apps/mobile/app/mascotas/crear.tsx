@@ -493,7 +493,7 @@ export default function CrearMascotaScreen() {
                 />
 
                 <CustomButton
-                  title="Continuar: Crear la publicación"
+                  title="Crear publicación"
                   variant="secondary"
                   disabled={!formularioValido || !permitePublicar || guardando}
                   onPress={() => void guardar(true)}
