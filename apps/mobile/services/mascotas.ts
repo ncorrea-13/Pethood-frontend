@@ -1,4 +1,4 @@
-import { get, post, postFormData } from './api';
+import { get, postFormData } from './api';
 
 export type Tamanio = 'PEQUENO' | 'MEDIANO' | 'GRANDE';
 export type Genero = 'MACHO' | 'HEMBRA';
@@ -75,6 +75,11 @@ export interface DatosNuevaPublicacion {
   descripcion: string;
   ubicacion: string;
   requisitos: string[];
+  personalidad: string[];
+  desparasitado: boolean;
+  vacunas: string;
+  /** En orden: la primera es la portada. Si va vacío se usa la foto de la mascota. */
+  fotos: { uri: string; nombre: string; tipo: string }[];
 }
 
 export interface Publicacion {
@@ -83,10 +88,34 @@ export interface Publicacion {
   descripcion: string | null;
   ubicacion: string | null;
   requisitos: string[];
+  personalidad: string[];
+  desparasitado: boolean;
+  vacunas: string | null;
+  imagenes: string[];
   mascotaId: number;
   usuarioId: number;
 }
 
 export function crearPublicacion(datos: DatosNuevaPublicacion): Promise<Publicacion> {
-  return post('/publicaciones', datos);
+  const formData = new FormData();
+
+  formData.append('mascotaId', String(datos.mascotaId));
+  formData.append('descripcion', datos.descripcion);
+  formData.append('ubicacion', datos.ubicacion);
+  formData.append('desparasitado', String(datos.desparasitado));
+  formData.append('vacunas', datos.vacunas);
+
+  // Repetir la clave es como viaja una lista en multipart.
+  for (const requisito of datos.requisitos) formData.append('requisitos', requisito);
+  for (const rasgo of datos.personalidad) formData.append('personalidad', rasgo);
+
+  for (const foto of datos.fotos) {
+    formData.append('fotos', {
+      uri: foto.uri,
+      name: foto.nombre,
+      type: foto.tipo,
+    } as unknown as Blob);
+  }
+
+  return postFormData('/publicaciones', formData);
 }
