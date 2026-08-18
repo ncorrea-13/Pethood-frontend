@@ -21,8 +21,8 @@ export function decodeSesion(token: string | undefined | null): Sesion | null {
     const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
     const json = atob(base64);
     const data = JSON.parse(json);
-    if (!data?.id || !Array.isArray(data?.roles)) return null;
-    return { id: data.id, email: data.email, roles: data.roles };
+    if (!data?.usuarioId || !Array.isArray(data?.roles)) return null;
+    return { id: data.usuarioId, email: data.email, roles: data.roles };
   } catch {
     return null;
   }
