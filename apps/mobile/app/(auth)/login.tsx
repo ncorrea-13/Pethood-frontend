@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Link, router } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
+import { useToast } from '@/components/feedback/Toast';
 import { GoogleLoginButton } from '@/components/GoogleLoginButton';
 import { PetHoodLogo } from '@/components/PetHoodLogo';
 import { guardarToken } from '@/lib/session';
@@ -21,6 +22,9 @@ import { ApiError } from '@/services/api';
 import { login } from '@/services/auth';
 
 export default function LoginScreen() {
+  const router = useRouter();
+  const toast = useToast();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);

@@ -43,7 +43,8 @@
           "photosPermission": "PetHood usa tus fotos para la foto de perfil.",
           "cameraPermission": "PetHood usa la cámara para la foto de perfil."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true
