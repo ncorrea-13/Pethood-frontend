@@ -5,6 +5,7 @@ import type { TextInputProps } from 'react-native';
 export interface CustomInputProps extends TextInputProps {
   label: string;
   error?: string;
+  required?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
   onRightIconPress?: () => void;
@@ -14,6 +15,7 @@ export interface CustomInputProps extends TextInputProps {
 export function CustomInput({
   label,
   error,
+  required = false,
   leftIcon,
   rightIcon,
   onRightIconPress,
@@ -25,7 +27,13 @@ export function CustomInput({
 
   return (
     <View className={`mb-4 ${containerClassName}`}>
-      <Text className="mb-2 text-sm font-medium text-gray-700">{label}</Text>
+      <Text
+        className="mb-2 text-sm font-medium text-gray-700"
+        accessibilityLabel={required ? `${label}, obligatorio` : label}
+      >
+        {label}
+        {required ? <Text className="font-semibold text-pethood-orange"> *</Text> : null}
+      </Text>
 
       <View
         className={`flex-row items-center rounded-xl border bg-white px-4 ${
@@ -37,6 +45,7 @@ export function CustomInput({
         <TextInput
           className={`flex-1 py-3.5 text-base text-gray-900 ${className}`}
           placeholderTextColor="#9CA3AF"
+          accessibilityLabel={required ? `${label}, obligatorio` : label}
           {...textInputProps}
         />
 

@@ -1,19 +1,17 @@
 import { Redirect } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
+import { useEffect, useState } from 'react';
 
-import { useSesion } from '@/hooks/useSesion';
+import { obtenerToken } from '@/lib/session';
 
 export default function Index() {
-  const { usuario, cargando } = useSesion();
+  const [destino, setDestino] = useState<'/home' | '/login' | null>(null);
 
-  // Mientras se lee la sesión guardada, para no mostrar el login a alguien ya logueado.
-  if (cargando) {
-    return (
-      <View className="flex-1 items-center justify-center bg-pethood-beige">
-        <ActivityIndicator size="large" color="#FF9D5C" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    void obtenerToken().then((token) => {
+      setDestino(token ? '/home' : '/login');
+    });
+  }, []);
 
-  return <Redirect href={usuario ? '/(tabs)' : '/login'} />;
+  if (!destino) return null;
+  return <Redirect href={destino} />;
 }

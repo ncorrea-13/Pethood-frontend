@@ -121,19 +121,16 @@ Al abrir el proyecto, aceptá las recomendaciones de `../../.vscode/extensions.j
 
 ### 7. Variables de entorno
 
-Copiá `.env.example` a `.env` y completalo. `.env` está gitignoreado: **nunca lo subas**.
+Copiá `apps/mobile/.env.example` a `apps/mobile/.env`:
 
-| Variable | Para qué |
-| --- | --- |
-| `EXPO_PUBLIC_API_URL` | URL del backend, ej. `http://192.168.0.10:3000` |
-
-Si la dejás vacía, la app deduce la IP de la máquina que sirve Metro, lo cual alcanza en la mayoría de los casos. Fijala a mano si tu PC tiene varias interfaces de red (WSL, VirtualBox, VPN) y Metro elige la equivocada.
-
-**Tiene que ser la IP de tu PC en la red WiFi, no `localhost`**: en el celular, `localhost` es el propio celular. Para encontrarla:
-
-```powershell
-Get-NetIPAddress -AddressFamily IPv4 | Where-Object InterfaceAlias -eq 'Wi-Fi' | Select-Object IPAddress
+```text
+EXPO_PUBLIC_API_URL="http://localhost:3000/api/v1"
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=""
 ```
+
+- En emulador Android, `localhost` no llega a tu PC: usá `http://10.0.2.2:3000/api/v1`.
+- En un celular físico, usá la IP de tu máquina en la LAN (misma Wi‑Fi).
+- `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` es el Client ID tipo **Aplicación web** de Google Cloud. Sin eso, el botón de Google avisa que falta configurar.
 
 ---
 
