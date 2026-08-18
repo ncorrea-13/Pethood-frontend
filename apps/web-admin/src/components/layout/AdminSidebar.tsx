@@ -1,13 +1,16 @@
+import { LayoutDashboard, Home, Users, ShieldAlert, Tags, Download } from "lucide-react";
 import { Sidebar } from "./Sidebar";
+
+const ICONO = "h-4 w-4 shrink-0";
 
 // Funciones exclusivas del rol Administrador — CLAUDE.md.
 const LINKS = [
-  { href: "/admin/dashboard", label: "Dashboard" },
-  { href: "/admin/refugios", label: "Refugios" },
-  { href: "/admin/usuarios", label: "Usuarios" },
-  { href: "/admin/moderacion", label: "Moderación" },
-  { href: "/admin/catalogos", label: "Catálogos" },
-  { href: "/admin/exportacion", label: "Exportación" },
+  { href: "/admin/dashboard", label: "Dashboard", icono: <LayoutDashboard className={ICONO} /> },
+  { href: "/admin/refugios", label: "Refugios", icono: <Home className={ICONO} /> },
+  { href: "/admin/usuarios", label: "Usuarios", icono: <Users className={ICONO} /> },
+  { href: "/admin/moderacion", label: "Moderación", icono: <ShieldAlert className={ICONO} /> },
+  { href: "/admin/catalogos", label: "Catálogos", icono: <Tags className={ICONO} /> },
+  { href: "/admin/exportacion", label: "Exportación", icono: <Download className={ICONO} /> },
 ];
 
 export function AdminSidebar() {

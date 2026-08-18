@@ -17,11 +17,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (esRutaAdmin && sesion && !tieneRol(sesion, "ADMIN")) {
+  if (esRutaAdmin && sesion && !tieneRol(sesion, "Administrador")) {
     return NextResponse.redirect(new URL("/refugio/dashboard", request.url));
   }
 
-  if (esRutaRefugio && sesion && !tieneRol(sesion, "MIEMBRO_REFUGIO")) {
+  if (esRutaRefugio && sesion && !tieneRol(sesion, "Refugio")) {
     return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 

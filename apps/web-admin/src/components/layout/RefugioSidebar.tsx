@@ -1,10 +1,13 @@
+import { LayoutDashboard, Megaphone, Building2 } from "lucide-react";
 import { Sidebar } from "./Sidebar";
+
+const ICONO = "h-4 w-4 shrink-0";
 
 // Funciones exclusivas del rol Refugio (ya verificado) — CLAUDE.md.
 const LINKS = [
-  { href: "/refugio/dashboard", label: "Dashboard" },
-  { href: "/refugio/campanas", label: "Campañas" },
-  { href: "/refugio/perfil", label: "Perfil público" },
+  { href: "/refugio/dashboard", label: "Dashboard", icono: <LayoutDashboard className={ICONO} /> },
+  { href: "/refugio/campanas", label: "Campañas", icono: <Megaphone className={ICONO} /> },
+  { href: "/refugio/perfil", label: "Perfil público", icono: <Building2 className={ICONO} /> },
 ];
 
 export function RefugioSidebar() {

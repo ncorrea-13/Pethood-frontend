@@ -8,6 +8,6 @@ export default async function Home() {
   const sesion = decodeSesion(token);
 
   if (!sesion) redirect("/login");
-  if (tieneRol(sesion, "ADMIN")) redirect("/admin/dashboard");
+  if (tieneRol(sesion, "Administrador")) redirect("/admin/dashboard");
   redirect("/refugio/dashboard");
 }
