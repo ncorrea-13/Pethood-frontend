@@ -77,3 +77,25 @@ export function validarConfirmacionPassword(
   }
   return undefined;
 }
+
+export function validarUbicacion(valor: string): string | undefined {
+  const recortado = valor.trim();
+  if (!recortado) {
+    return 'El barrio / ciudad es obligatorio';
+  }
+  if (recortado.length > 80) {
+    return 'El barrio / ciudad no puede superar los 80 caracteres';
+  }
+  return undefined;
+}
+
+export function validarCodigoRecuperacion(valor: string): string | undefined {
+  const recortado = valor.trim();
+  if (!recortado) {
+    return 'El código es obligatorio';
+  }
+  if (!/^\d{6}$/.test(recortado)) {
+    return 'El código debe tener 6 dígitos';
+  }
+  return undefined;
+}

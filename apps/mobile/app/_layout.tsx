@@ -47,6 +47,8 @@ function RootNavigator() {
         <Stack.Screen name="home" />
         <Stack.Screen name="mascotas/crear" options={{ presentation: 'card' }} />
         <Stack.Screen name="publicaciones/crear" options={{ presentation: 'card' }} />
+        <Stack.Screen name="perfil/editar" options={{ presentation: 'card' }} />
+        <Stack.Screen name="perfil/password" options={{ presentation: 'card' }} />
         <Stack.Screen name="+not-found" />
       </Stack.Protected>
     </Stack>

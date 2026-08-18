@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { Link, useRouter, type Href } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -136,6 +136,16 @@ export default function LoginScreen() {
                 onRightIconPress={() => setShowPassword((prev) => !prev)}
                 required
               />
+
+              <Pressable
+                onPress={() => router.push('/recuperar' as Href)}
+                accessibilityRole="button"
+                className="mb-4 self-end"
+              >
+                <Text className="text-sm font-semibold text-pethood-orange">
+                  ¿Olvidaste tu contraseña?
+                </Text>
+              </Pressable>
 
               {formError ? <Text className="mb-3 text-sm text-red-500">{formError}</Text> : null}
 

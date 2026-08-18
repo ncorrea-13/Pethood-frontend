@@ -1,6 +1,5 @@
 /** Home autenticada — acceso visual a las secciones principales. */
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
 import {
   ImageBackground,
   type ImageSourcePropType,
@@ -98,7 +97,6 @@ function TarjetaAcceso({ tarjeta }: { tarjeta: TarjetaHome }) {
 
 export default function InicioScreen() {
   const { usuario } = useSesion();
-  const [modoRefugio, setModoRefugio] = useState(false);
   const nombre = usuario?.nombre?.trim();
 
   return (
@@ -121,26 +119,17 @@ export default function InicioScreen() {
               <Ionicons name="heart" size={22} color="#FF9D5C" />
             </Pressable>
 
-            <Pressable
+            <View
               accessibilityRole="switch"
-              accessibilityState={{ checked: modoRefugio }}
-              accessibilityLabel="Modo refugio"
-              onPress={() => setModoRefugio((prev) => !prev)}
-              className="flex-row items-center gap-2"
+              accessibilityState={{ checked: false, disabled: true }}
+              accessibilityLabel="Modo refugio, no disponible todavía"
+              className="flex-row items-center gap-2 opacity-40"
             >
               <Text className="text-sm text-gray-500">Refugio</Text>
-              <View
-                className={`h-7 w-12 justify-center rounded-full px-0.5 ${
-                  modoRefugio ? 'bg-pethood-orange' : 'bg-gray-300'
-                }`}
-              >
-                <View
-                  className={`h-6 w-6 rounded-full bg-white shadow-sm ${
-                    modoRefugio ? 'self-end' : 'self-start'
-                  }`}
-                />
+              <View className="h-7 w-12 justify-center rounded-full bg-gray-300 px-0.5">
+                <View className="h-6 w-6 self-start rounded-full bg-white shadow-sm" />
               </View>
-            </Pressable>
+            </View>
           </View>
         </View>
 
