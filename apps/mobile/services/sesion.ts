@@ -39,6 +39,9 @@ export interface UsuarioSesion {
   verificado: boolean;
   refugioId: number | null;
   roles: string[];
+  imagenUrl?: string | null;
+  telefono?: string | null;
+  ubicacion?: string | null;
 }
 
 export function esRefugio(usuario: UsuarioSesion | null): boolean {

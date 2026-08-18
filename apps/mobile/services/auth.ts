@@ -1,6 +1,6 @@
 import { appendArchivoImagen, type ArchivoImagenLocal } from '@/lib/formDataImagen';
 import { apiFetch } from '@/services/api';
-import type { RegistroPayload, RespuestaAuth } from '@/types/auth';
+import type { RegistroPayload, RespuestaAuth, RespuestaRecuperar } from '@/types/auth';
 
 export function login(email: string, password: string): Promise<RespuestaAuth> {
   return apiFetch<RespuestaAuth>('/auth/login', {
@@ -42,5 +42,23 @@ export function logout(token: string): Promise<void> {
   return apiFetch<void>('/auth/logout', {
     method: 'POST',
     token,
+  });
+}
+
+export function solicitarRecuperacion(email: string): Promise<RespuestaRecuperar> {
+  return apiFetch<RespuestaRecuperar>('/auth/recuperar', {
+    method: 'POST',
+    body: { email },
+  });
+}
+
+export function resetearPassword(
+  email: string,
+  codigo: string,
+  password: string,
+): Promise<void> {
+  return apiFetch<void>('/auth/resetear', {
+    method: 'POST',
+    body: { email, codigo, password },
   });
 }

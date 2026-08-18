@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /**
  * Navegación inferior del área autenticada.
@@ -10,6 +11,8 @@ import { Pressable, View } from 'react-native';
  */
 export default function TabsLayout() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const paddingBottom = Math.max(insets.bottom, 12);
 
   return (
     <Tabs
@@ -20,10 +23,13 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#F3F4F6',
-          paddingTop: 4,
+          height: 64 + paddingBottom,
+          paddingTop: 8,
+          paddingBottom,
           overflow: 'visible',
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
+        tabBarItemStyle: { paddingTop: 2 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '500', paddingTop: 2, paddingBottom: 0 },
       }}
     >
       <Tabs.Screen

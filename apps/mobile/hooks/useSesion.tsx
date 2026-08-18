@@ -2,7 +2,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { borrarSesion, guardarSesion, obtenerToken, obtenerUsuario } from '@/lib/session';
+import {
+  borrarSesion,
+  guardarSesion,
+  guardarUsuario,
+  obtenerToken,
+  obtenerUsuario,
+} from '@/lib/session';
 import * as authService from '@/services/auth';
 import { esRefugio as usuarioEsRefugio, type UsuarioSesion } from '@/services/sesion';
 import type { Usuario } from '@/types/auth';
@@ -16,6 +22,7 @@ interface ContextoSesion {
   cargando: boolean;
   esRefugio: boolean;
   establecerSesion: (token: string, usuario: Usuario) => Promise<void>;
+  actualizarUsuario: (usuario: Usuario) => Promise<void>;
   iniciarSesion: (email: string, contrasena: string) => Promise<void>;
   cerrarSesion: () => Promise<void>;
 }
@@ -41,6 +48,9 @@ function aUsuarioSesion(usuario: Usuario): UsuarioSesion {
     verificado: false,
     refugioId: null,
     roles: usuario.roles,
+    imagenUrl: usuario.imagenUrl,
+    telefono: usuario.telefono,
+    ubicacion: usuario.ubicacion,
   };
 }
 
@@ -62,6 +72,11 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     setToken(nuevoToken);
     setUsuario(aUsuarioSesion(nuevoUsuario));
     await guardarSesion(nuevoToken, nuevoUsuario);
+  }, []);
+
+  const actualizarUsuario = useCallback(async (nuevoUsuario: Usuario) => {
+    setUsuario(aUsuarioSesion(nuevoUsuario));
+    await guardarUsuario(nuevoUsuario);
   }, []);
 
   const iniciarSesion = useCallback(
@@ -90,10 +105,11 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       cargando,
       esRefugio: usuarioEsRefugio(usuario),
       establecerSesion,
+      actualizarUsuario,
       iniciarSesion,
       cerrarSesion,
     }),
-    [usuario, token, cargando, establecerSesion, iniciarSesion, cerrarSesion],
+    [usuario, token, cargando, establecerSesion, actualizarUsuario, iniciarSesion, cerrarSesion],
   );
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
