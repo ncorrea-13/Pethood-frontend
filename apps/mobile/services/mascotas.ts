@@ -1,4 +1,4 @@
-import { get, postFormData } from './api';
+import { del, get, patchFormData, postFormData } from './api';
 
 export type Tamanio = 'PEQUENO' | 'MEDIANO' | 'GRANDE';
 export type Genero = 'MACHO' | 'HEMBRA';
@@ -68,6 +68,74 @@ export async function crearMascota(datos: DatosNuevaMascota): Promise<Mascota> {
 
 export function listarMisMascotas(): Promise<Mascota[]> {
   return get('/mascotas/mias');
+}
+
+/** No hay endpoint `GET /mascotas/:id`: la ficha propia se busca dentro del listado. */
+export async function obtenerMiMascota(id: number): Promise<Mascota | null> {
+  const mascotas = await listarMisMascotas();
+  return mascotas.find((mascota) => mascota.id === id) ?? null;
+}
+
+/**
+ * Campos a modificar (HU-6.2). Un campo `undefined` NO viaja y el backend lo deja como
+ * está; solo se manda lo que cambió.
+ *
+ * Dos trampas del contrato:
+ * - `castrado` en `false` y `castrado` ausente dan resultados distintos, así que la
+ *   pantalla lo manda siempre, haya cambiado o no.
+ * - `especieId` y `razaId` viajan de a dos o no viajan: uno solo es un 400.
+ */
+export interface CambiosMascota {
+  nombre?: string;
+  fechaNacimiento?: string;
+  genero?: Genero;
+  peso?: string;
+  tamanio?: Tamanio;
+  especieId?: number;
+  razaId?: number;
+  castrado?: boolean;
+  /** Una cadena vacía borra la descripción; `undefined` la deja intacta. */
+  descripcion?: string;
+  foto?: { uri: string; nombre: string; tipo: string };
+}
+
+export function editarMascota(id: number, cambios: CambiosMascota): Promise<Mascota> {
+  const formData = new FormData();
+
+  // Se compara contra undefined y no por truthiness: `castrado: false` y `descripcion: ''`
+  // son cambios reales que tienen que viajar.
+  if (cambios.nombre !== undefined) formData.append('nombre', cambios.nombre);
+  if (cambios.fechaNacimiento !== undefined) {
+    formData.append('fechaNacimiento', cambios.fechaNacimiento);
+  }
+  if (cambios.genero !== undefined) formData.append('genero', cambios.genero);
+  if (cambios.peso !== undefined) formData.append('peso', cambios.peso);
+  if (cambios.tamanio !== undefined) formData.append('tamanio', cambios.tamanio);
+  if (cambios.especieId !== undefined) formData.append('especieId', String(cambios.especieId));
+  if (cambios.razaId !== undefined) formData.append('razaId', String(cambios.razaId));
+  if (cambios.castrado !== undefined) formData.append('castrado', String(cambios.castrado));
+  if (cambios.descripcion !== undefined) formData.append('descripcion', cambios.descripcion);
+
+  if (cambios.foto) {
+    formData.append('foto', {
+      uri: cambios.foto.uri,
+      name: cambios.foto.nombre,
+      type: cambios.foto.tipo,
+    } as unknown as Blob);
+  }
+
+  return patchFormData(`/mascotas/${id}`, formData);
+}
+
+export interface ResultadoEliminacion {
+  id: number;
+  /** Si es mayor a 0, la baja también retiró la publicación en adopción. */
+  publicacionesDadasDeBaja: number;
+}
+
+/** Baja lógica (HU-6.3): la mascota deja de aparecer en los listados. */
+export function eliminarMascota(id: number): Promise<ResultadoEliminacion> {
+  return del(`/mascotas/${id}`);
 }
 
 export interface DatosNuevaPublicacion {

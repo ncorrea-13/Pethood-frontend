@@ -21,6 +21,11 @@ interface PhotoPickerProps {
   foto: FotoElegida | null;
   onChange: (foto: FotoElegida | null) => void;
   error?: string;
+  /**
+   * En la edición la mascota siempre conserva una foto — no hay forma de dejarla sin
+   * ninguna — así que ahí la cruz solo aparece cuando hay una foto nueva que descartar.
+   */
+  permiteQuitar?: boolean;
 }
 
 const EXTENSION_POR_TIPO: Record<string, string> = {
@@ -43,7 +48,12 @@ function normalizarTipo(tipo: string): string {
   return minuscula === 'image/jpg' ? 'image/jpeg' : minuscula;
 }
 
-export function PhotoPicker({ foto, onChange, error }: PhotoPickerProps) {
+export function PhotoPicker({
+  foto,
+  onChange,
+  error,
+  permiteQuitar = true,
+}: PhotoPickerProps) {
   const [cargando, setCargando] = useState(false);
 
   const procesar = (resultado: ImagePicker.ImagePickerResult): void => {
@@ -123,15 +133,17 @@ export function PhotoPicker({ foto, onChange, error }: PhotoPickerProps) {
             accessibilityLabel="Vista previa de la foto elegida"
           />
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Quitar la foto"
-            onPress={() => onChange(null)}
-            hitSlop={8}
-            className="absolute right-3 top-3 h-9 w-9 items-center justify-center rounded-full bg-black/50 active:opacity-80"
-          >
-            <Ionicons name="close" size={20} color="#FFFFFF" />
-          </Pressable>
+          {permiteQuitar ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Quitar la foto"
+              onPress={() => onChange(null)}
+              hitSlop={8}
+              className="absolute right-3 top-3 h-9 w-9 items-center justify-center rounded-full bg-black/50 active:opacity-80"
+            >
+              <Ionicons name="close" size={20} color="#FFFFFF" />
+            </Pressable>
+          ) : null}
 
           <Pressable
             accessibilityRole="button"
