@@ -3,6 +3,7 @@ import { AUTH_COOKIE } from "@/lib/auth";
 import { obtenerDashboard, esDashboardVacio } from "@/services/dashboard";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { BarList } from "@/components/dashboard/BarList";
+import { DonutChart } from "@/components/dashboard/DonutChart";
 import { TablaSolicitudesPorEstado } from "@/components/dashboard/TablaSolicitudesPorEstado";
 import { TablaPublicacionesPorMes } from "@/components/dashboard/TablaPublicacionesPorMes";
 import { DashboardVacio } from "@/components/dashboard/DashboardVacio";
@@ -37,7 +38,7 @@ export default async function DashboardAdminPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <BarList
+        <DonutChart
           titulo="Usuarios por rol"
           items={Object.entries(dashboard.usuariosPorRol).map(([etiqueta, valor]) => ({ etiqueta, valor }))}
         />

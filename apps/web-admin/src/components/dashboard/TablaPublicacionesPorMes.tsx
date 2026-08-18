@@ -2,7 +2,7 @@ import type { PublicacionPorMes } from "@/types/dashboard";
 
 export function TablaPublicacionesPorMes({ items }: { items: PublicacionPorMes[] }) {
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+    <div className="rounded-lg border border-pethood-beige-dark bg-white p-4">
       <h2 className="text-sm font-semibold text-neutral-700">Publicaciones y adopciones (últimos 6 meses)</h2>
       <table className="mt-3 w-full text-sm">
         <thead>

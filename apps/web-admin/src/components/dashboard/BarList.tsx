@@ -8,7 +8,7 @@ export function BarList({ titulo, items }: BarListProps) {
   const max = Math.max(1, ...items.map((item) => item.valor));
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+    <div className="rounded-lg border border-pethood-beige-dark bg-white p-4">
       <h2 className="text-sm font-semibold text-neutral-700">{titulo}</h2>
       <ul className="mt-3 space-y-2">
         {items.map((item) => (

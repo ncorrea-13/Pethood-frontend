@@ -2,7 +2,7 @@ import type { SolicitudPorEstado } from "@/types/dashboard";
 
 export function TablaSolicitudesPorEstado({ items }: { items: SolicitudPorEstado[] }) {
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+    <div className="rounded-lg border border-pethood-beige-dark bg-white p-4">
       <h2 className="text-sm font-semibold text-neutral-700">Solicitudes por estado</h2>
       <table className="mt-3 w-full text-sm">
         <thead>
