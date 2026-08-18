@@ -2,6 +2,13 @@ import type { ApiErrorBody } from '@/types/api';
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000/api/v1';
 
+export function urlAbsoluta(ruta: string | null | undefined): string | null {
+  if (!ruta) return null;
+  if (ruta.startsWith('http://') || ruta.startsWith('https://')) return ruta;
+  const origen = API_URL.replace(/\/api\/v1\/?$/, '');
+  return `${origen}${ruta.startsWith('/') ? ruta : `/${ruta}`}`;
+}
+
 export class ApiError extends Error {
   codigo: string;
   status: number;
