@@ -11,7 +11,7 @@ export default async function RefugioLayout({ children }: { children: React.Reac
   const sesion = decodeSesion(token);
 
   if (!sesion) redirect("/login");
-  if (!tieneRol(sesion, "MIEMBRO_REFUGIO")) redirect("/admin/dashboard");
+  if (!tieneRol(sesion, "Refugio")) redirect("/admin/dashboard");
 
   return (
     <div className="flex min-h-screen flex-col">
