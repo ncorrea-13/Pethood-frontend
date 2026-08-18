@@ -111,7 +111,26 @@ packages/shared/          # placeholder, sin código todavía
 - Estados visuales claros: cargando / vacío / error en cada listado.
 - Mobile: Node 22 LTS + npm únicamente (ver `apps/mobile/.nvmrc`/`.npmrc`), variables sensibles en `.env` con prefijo `EXPO_PUBLIC_`, tokens JWT en `expo-secure-store` (nunca AsyncStorage plano). Web-admin: variables en `.env.local` de Next.js. Nunca commitear archivos `.env*` reales.
 - No armar contenido en `packages/shared` sin una duplicación real que lo justifique.
+- **Toda validación genérica va en `apps/mobile/shared/validation/`**, nunca suelta en una pantalla: `limits.ts` (longitudes y rangos), `dates.ts`, `numbers.ts`, `text.ts`. Devuelven el mensaje de error o `null`, que es justo lo que espera la prop `error` de los inputs. Si te falta una regla, agregala ahí antes de usarla.
+- `shared/validation/limits.ts` está **duplicado a mano** en `pethood-backend/src/shared/validation/limits.ts` (son repos separados, no hay import posible). Si cambiás un número, cambialo en los dos en el mismo PR: si divergen, el input corta a una longitud y el server valida otra.
 
 ## Identidad visual
 
-Confianza, transparencia y calidez. Colores institucionales: `#FF7A45` (naranja), `#F5EBE0` (beige). Colores claros que guían acciones y comunican estados (solicitud pendiente/aprobada, vigencia de publicación, progreso de campaña). Prototipos de alta fidelidad en Figma antes de codificar.
+Confianza, transparencia y calidez. Colores claros que guían acciones y comunican estados (solicitud pendiente/aprobada, vigencia de publicación, progreso de campaña).
+
+**Paleta (tomada del diseño de referencia, ver abajo):** `#FF9D5C` naranja principal, `#FF8A3D` presionado, `#FFF5ED` fondo de pantallas, `#F5F1E8` fin del degradado, `#FAFAFA` fondo de campos de formulario. Están todos en `apps/mobile/tailwind.config.js` como `pethood-*`: **usar siempre la clase, nunca el hex suelto**, para que un cambio de paleta sea un solo archivo.
+
+> Reemplazan al `#FF7A45` / `#F5EBE0` que figuraba antes acá, que no coincidía con el diseño (decisión de equipo, 2026-08-13).
+
+## Diseño de referencia
+
+El prototipo de alta fidelidad está exportado como app web React en `source/` (raíz del proyecto, fuera de ambos repos): Vite + Tailwind + shadcn/ui + lucide-react. Sirve como **especificación visual**, no como código reutilizable — es web (`<div>`, CSS), y React Native necesita `<View>`/`<Text>`, así que cada pantalla se porta a mano.
+
+Qué mirar ahí antes de codear una pantalla:
+
+- `src/app/pages/Register.tsx` — el formulario más completo: estilo de campo, label, marca de obligatorio y mensaje de error.
+- `src/app/components/AnimalCard.tsx` y `pages/shelter/ShelterAnimals.tsx` — tarjetas de mascota y listado.
+- `src/app/components/AlertMessage.tsx` — mensajes de feedback.
+- `src/app/components/BottomNav.tsx` — navegación inferior.
+
+**Ojo:** el diseño incluye una pestaña "Mapa" que **no se implementa** — el proyecto excluye explícitamente el mapa interactivo. Y no trae la pantalla de crear mascota, así que ese formulario se arma siguiendo las convenciones de `Register.tsx`.

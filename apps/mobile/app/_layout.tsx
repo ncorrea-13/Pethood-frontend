@@ -4,9 +4,10 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-export {
-  ErrorBoundary,
-} from 'expo-router';
+import { ToastProvider } from '@/components/feedback/Toast';
+import { SesionProvider } from '@/hooks/useSesion';
+
+export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
   initialRouteName: 'index',
@@ -14,12 +15,19 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   return (
-    <>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-      </Stack>
-    </>
+    <SesionProvider>
+      {/* El provider de toasts envuelve al Stack para que un toast disparado antes de
+          navegar siga visible en la pantalla siguiente. */}
+      <ToastProvider>
+        <StatusBar style="dark" />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="mascotas/crear" options={{ presentation: 'card' }} />
+          <Stack.Screen name="publicaciones/crear" options={{ presentation: 'card' }} />
+        </Stack>
+      </ToastProvider>
+    </SesionProvider>
   );
 }

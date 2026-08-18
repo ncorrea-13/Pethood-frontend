@@ -121,7 +121,19 @@ Al abrir el proyecto, aceptá las recomendaciones de `../../.vscode/extensions.j
 
 ### 7. Variables de entorno
 
-Hoy **no hay** `.env` obligatorios. Cuando se integre el backend, se documentarán acá (por ejemplo `EXPO_PUBLIC_API_URL`) y se agregará un `.env.example` para que todos usen las mismas keys.
+Copiá `.env.example` a `.env` y completalo. `.env` está gitignoreado: **nunca lo subas**.
+
+| Variable | Para qué |
+| --- | --- |
+| `EXPO_PUBLIC_API_URL` | URL del backend, ej. `http://192.168.0.10:3000` |
+
+Si la dejás vacía, la app deduce la IP de la máquina que sirve Metro, lo cual alcanza en la mayoría de los casos. Fijala a mano si tu PC tiene varias interfaces de red (WSL, VirtualBox, VPN) y Metro elige la equivocada.
+
+**Tiene que ser la IP de tu PC en la red WiFi, no `localhost`**: en el celular, `localhost` es el propio celular. Para encontrarla:
+
+```powershell
+Get-NetIPAddress -AddressFamily IPv4 | Where-Object InterfaceAlias -eq 'Wi-Fi' | Select-Object IPAddress
+```
 
 ---
 
