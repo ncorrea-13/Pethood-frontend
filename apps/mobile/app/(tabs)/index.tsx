@@ -1,14 +1,19 @@
-/** GUI-04 Mascotas Adoptante — listado de las mascotas propias y acceso a la creación. */
+/**
+ * GUI-04 Mascotas Adoptante — listado de las mascotas propias, acceso a la creación y
+ * punto de entrada a editar (HU-6.2) y eliminar (HU-6.3) cada una.
+ */
 import { Ionicons } from '@expo/vector-icons';
-import { Link, useFocusEffect } from 'expo-router';
+import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useToast } from '@/components/feedback/Toast';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EstadoMascotaBadge } from '@/components/ui/EstadoMascotaBadge';
 import { useSesion } from '@/hooks/useSesion';
-import { urlAbsoluta } from '@/services/api';
-import { listarMisMascotas, type Mascota } from '@/services/mascotas';
+import { ApiError, urlAbsoluta } from '@/services/api';
+import { eliminarMascota, listarMisMascotas, type Mascota } from '@/services/mascotas';
 import { edadEnTexto, parsearFecha } from '@/shared/validation/dates';
 
 const ETIQUETA_TAMANIO = {
@@ -22,7 +27,15 @@ function edad(fechaNacimiento: string | null): string | null {
   return fecha ? edadEnTexto(fecha) : null;
 }
 
-function TarjetaMascota({ mascota }: { mascota: Mascota }) {
+interface TarjetaMascotaProps {
+  mascota: Mascota;
+  /** Solo el creador del registro ve las acciones (misma regla que en publicaciones). */
+  esPropia: boolean;
+  onEditar: () => void;
+  onEliminar: () => void;
+}
+
+function TarjetaMascota({ mascota, esPropia, onEditar, onEliminar }: TarjetaMascotaProps) {
   const foto = urlAbsoluta(mascota.imagenUrl);
 
   return (
@@ -47,8 +60,32 @@ function TarjetaMascota({ mascota }: { mascota: Mascota }) {
             .join(' · ')}
         </Text>
 
-        <View className="mt-2">
+        <View className="mt-2 flex-row items-center justify-between">
           <EstadoMascotaBadge estado={mascota.estado.nombre} />
+
+          {esPropia ? (
+            <View className="flex-row gap-1.5">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Editar ${mascota.nombre}`}
+                onPress={onEditar}
+                hitSlop={6}
+                className="h-9 w-9 items-center justify-center rounded-full bg-gray-100 active:opacity-70"
+              >
+                <Ionicons name="pencil" size={16} color="#4B5563" />
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Eliminar ${mascota.nombre}`}
+                onPress={onEliminar}
+                hitSlop={6}
+                className="h-9 w-9 items-center justify-center rounded-full bg-red-50 active:opacity-70"
+              >
+                <Ionicons name="trash-outline" size={16} color="#DC2626" />
+              </Pressable>
+            </View>
+          ) : null}
         </View>
       </View>
     </View>
@@ -80,12 +117,20 @@ function ListaVacia() {
 }
 
 export default function MisMascotasScreen() {
-  const { esRefugio } = useSesion();
+  const { esRefugio, usuario } = useSesion();
+  const router = useRouter();
+  const toast = useToast();
 
   const [mascotas, setMascotas] = useState<Mascota[]>([]);
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /** Mascota esperando confirmación de baja; null cuando el modal está cerrado. */
+  const [aEliminar, setAEliminar] = useState<Mascota | null>(null);
+  const [eliminando, setEliminando] = useState(false);
+  /** Mensaje del 409: la baja quedó bloqueada por solicitudes sin responder. */
+  const [bloqueo, setBloqueo] = useState<string | null>(null);
 
   const cargar = useCallback(async (): Promise<void> => {
     try {
@@ -99,12 +144,47 @@ export default function MisMascotasScreen() {
     }
   }, []);
 
-  // Se recarga al volver de crear una mascota, para que aparezca la recién creada.
+  // Se recarga al volver de crear o editar una mascota, para reflejar los cambios.
   useFocusEffect(
     useCallback(() => {
       void cargar();
     }, [cargar]),
   );
+
+  const confirmarEliminacion = async (): Promise<void> => {
+    if (!aEliminar) return;
+
+    const nombre = aEliminar.nombre ?? 'La mascota';
+    setEliminando(true);
+
+    try {
+      const resultado = await eliminarMascota(aEliminar.id);
+      setAEliminar(null);
+
+      toast.mostrarExito(
+        resultado.publicacionesDadasDeBaja > 0
+          ? `Eliminamos a ${nombre} y retiramos su publicación en adopción.`
+          : `Eliminamos a ${nombre} de tus mascotas.`,
+      );
+
+      await cargar();
+    } catch (err) {
+      setAEliminar(null);
+
+      // El 409 no es un error del usuario sino un bloqueo con salida: se explica en un
+      // diálogo aparte en vez de un toast rojo.
+      if (err instanceof ApiError && err.codigo === 'SOLICITUDES_ABIERTAS') {
+        setBloqueo(err.message);
+        return;
+      }
+
+      toast.mostrarError(
+        err instanceof Error ? err.message : 'No pudimos eliminar la mascota. Intentalo de nuevo.',
+      );
+    } finally {
+      setEliminando(false);
+    }
+  };
 
   return (
     <View className="flex-1 bg-pethood-beige">
@@ -139,7 +219,16 @@ export default function MisMascotasScreen() {
           <FlatList
             data={mascotas}
             keyExtractor={(mascota) => String(mascota.id)}
-            renderItem={({ item }) => <TarjetaMascota mascota={item} />}
+            renderItem={({ item }) => (
+              <TarjetaMascota
+                mascota={item}
+                esPropia={item.usuarioId === usuario?.id}
+                onEditar={() =>
+                  router.push({ pathname: '/mascotas/[id]/editar', params: { id: item.id } })
+                }
+                onEliminar={() => setAEliminar(item)}
+              />
+            )}
             ListEmptyComponent={ListaVacia}
             contentContainerClassName="px-5 py-4 pb-28"
             refreshControl={
@@ -166,6 +255,31 @@ export default function MisMascotasScreen() {
           </Pressable>
         </Link>
       </SafeAreaView>
+
+      {/* Regla transversal 6 de CLAUDE.md: confirmación antes de una acción crítica. */}
+      <ConfirmDialog
+        visible={aEliminar !== null}
+        tono="peligro"
+        titulo={`¿Eliminar a ${aEliminar?.nombre ?? 'esta mascota'}?`}
+        mensaje="Se va a retirar de la plataforma junto con su publicación en adopción, si tiene una."
+        detalle="Esta acción no se puede deshacer desde la app."
+        textoConfirmar="Eliminar"
+        cargando={eliminando}
+        onConfirmar={() => void confirmarEliminacion()}
+        onCerrar={() => setAEliminar(null)}
+      />
+
+      {/* Sin `onConfirmar` el diálogo es informativo: todavía no hay pantalla de solicitudes
+          (módulo 7) a la que mandar al usuario. Cuando exista, acá va un botón
+          "Ver solicitudes" que navegue a resolverlas. */}
+      <ConfirmDialog
+        visible={bloqueo !== null}
+        tono="advertencia"
+        titulo="No se puede eliminar todavía"
+        mensaje={bloqueo ?? ''}
+        detalle="Vas a poder responderlas desde el módulo de adopciones."
+        onCerrar={() => setBloqueo(null)}
+      />
     </View>
   );
 }

@@ -25,6 +25,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="mascotas/crear" options={{ presentation: 'card' }} />
+          <Stack.Screen name="mascotas/[id]/editar" options={{ presentation: 'card' }} />
           <Stack.Screen name="publicaciones/crear" options={{ presentation: 'card' }} />
         </Stack>
       </ToastProvider>

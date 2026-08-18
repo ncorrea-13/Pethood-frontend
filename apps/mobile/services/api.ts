@@ -84,16 +84,30 @@ export async function post<T>(ruta: string, cuerpo: unknown): Promise<T> {
   return procesarRespuesta<T>(respuesta);
 }
 
+/** `delete` es palabra reservada, así que el helper del verbo DELETE se llama `del`. */
+export async function del<T>(ruta: string): Promise<T> {
+  const respuesta = await fetch(`${URL_BASE}/api/v1${ruta}`, {
+    method: 'DELETE',
+    headers: await cabeceras(),
+  });
+
+  return procesarRespuesta<T>(respuesta);
+}
+
 /**
- * POST multipart. Usa XMLHttpRequest y no fetch: el fetch global de Expo pasa los archivos
+ * Envío multipart. Usa XMLHttpRequest y no fetch: el fetch global de Expo pasa los archivos
  * por base64 y corrompe la imagen. El XHR de React Native la sube directo desde su uri.
  */
-export async function postFormData<T>(ruta: string, formData: FormData): Promise<T> {
+async function enviarFormData<T>(
+  metodo: 'POST' | 'PATCH',
+  ruta: string,
+  formData: FormData,
+): Promise<T> {
   const token = await obtenerToken();
 
   return new Promise<T>((resolve, reject) => {
     const peticion = new XMLHttpRequest();
-    peticion.open('POST', `${URL_BASE}/api/v1${ruta}`);
+    peticion.open(metodo, `${URL_BASE}/api/v1${ruta}`);
 
     // El Content-Type con su boundary lo arma el XHR: no setearlo a mano.
     if (token) peticion.setRequestHeader('Authorization', `Bearer ${token}`);
@@ -121,6 +135,14 @@ export async function postFormData<T>(ruta: string, formData: FormData): Promise
 
     peticion.send(formData);
   });
+}
+
+export function postFormData<T>(ruta: string, formData: FormData): Promise<T> {
+  return enviarFormData<T>('POST', ruta, formData);
+}
+
+export function patchFormData<T>(ruta: string, formData: FormData): Promise<T> {
+  return enviarFormData<T>('PATCH', ruta, formData);
 }
 
 function interpretarCuerpo(texto: string): unknown {
