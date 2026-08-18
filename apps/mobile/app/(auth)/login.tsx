@@ -13,17 +13,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
-import { useToast } from '@/components/feedback/Toast';
 import { GoogleLoginButton } from '@/components/GoogleLoginButton';
 import { PetHoodLogo } from '@/components/PetHoodLogo';
-import { guardarToken } from '@/lib/session';
+import { useSesion } from '@/hooks/useSesion';
 import { validarEmail, validarPassword } from '@/lib/validacionRegistro';
 import { ApiError } from '@/services/api';
 import { login } from '@/services/auth';
+import type { Usuario } from '@/types/auth';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const toast = useToast();
+  const { establecerSesion } = useSesion();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,10 +54,13 @@ export default function LoginScreen() {
     return !Object.values(nextErrors).some(Boolean);
   };
 
-  const completarSesion = useCallback(async (token: string): Promise<void> => {
-    await guardarToken(token);
-    router.replace('/home');
-  }, []);
+  const completarSesion = useCallback(
+    async (token: string, usuario: Usuario): Promise<void> => {
+      await establecerSesion(token, usuario);
+      router.replace('/(tabs)');
+    },
+    [establecerSesion, router],
+  );
 
   const handleLogin = async (): Promise<void> => {
     if (!validateForm()) return;
@@ -66,7 +69,7 @@ export default function LoginScreen() {
     setFormError(undefined);
     try {
       const respuesta = await login(email.trim(), password);
-      await completarSesion(respuesta.token);
+      await completarSesion(respuesta.token, respuesta.usuario);
     } catch (error) {
       const mensaje =
         error instanceof ApiError

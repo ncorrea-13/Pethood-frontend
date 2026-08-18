@@ -42,7 +42,9 @@ export interface UsuarioSesion {
 }
 
 export function esRefugio(usuario: UsuarioSesion | null): boolean {
-  return usuario?.roles.includes('Refugio') ?? false;
+  return (
+    usuario?.roles.includes('Refugio') || usuario?.roles.includes('MIEMBRO_REFUGIO') || false
+  );
 }
 
 export async function obtenerToken(): Promise<string | null> {

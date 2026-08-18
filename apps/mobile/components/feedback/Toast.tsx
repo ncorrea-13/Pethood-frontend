@@ -8,7 +8,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { Animated, Platform, Pressable, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export type TipoToast = 'exito' | 'advertencia' | 'error';
@@ -53,7 +53,8 @@ function ToastVisible({ toast, onCerrar }: { toast: Toast; onCerrar: () => void 
     Animated.timing(opacidad, {
       toValue: 1,
       duration: 200,
-      useNativeDriver: true,
+      // En web no existe el módulo nativo de animación; en iOS/Android sí.
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, [opacidad]);
 
@@ -105,8 +106,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {toasts.length > 0 ? (
         <SafeAreaView
           edges={['top']}
-          pointerEvents="box-none"
           className="absolute left-0 right-0 top-0 px-4"
+          style={{ pointerEvents: 'box-none' }}
         >
           {toasts.map((toast) => (
             <ToastVisible key={toast.id} toast={toast} onCerrar={() => cerrar(toast.id)} />

@@ -5,7 +5,7 @@
  * acá. La validación es para UX; la fuente de verdad es el backend.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -161,7 +161,7 @@ export default function CrearPublicacionScreen() {
       });
 
       toast.mostrarExito('¡Listo! Tu publicación ya está activa.');
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/mis-mascotas' as Href);
     } catch (err) {
       // Se queda en la pantalla con todo lo cargado, para poder reintentar.
       toast.mostrarError(
@@ -179,7 +179,7 @@ export default function CrearPublicacionScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Volver"
-            onPress={() => router.replace('/(tabs)')}
+            onPress={() => router.replace('/(tabs)/mis-mascotas' as Href)}
             hitSlop={8}
             className="h-10 w-10 items-center justify-center rounded-full bg-white active:opacity-80"
           >

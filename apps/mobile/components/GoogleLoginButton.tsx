@@ -4,9 +4,10 @@ import { CustomButton } from '@/components/CustomButton';
 import { googleHabilitado, useGoogleIdToken } from '@/lib/googleAuth';
 import { ApiError } from '@/services/api';
 import { loginGoogle } from '@/services/auth';
+import type { Usuario } from '@/types/auth';
 
 interface GoogleLoginButtonProps {
-  onSuccess: (token: string) => Promise<void>;
+  onSuccess: (token: string, usuario: Usuario) => Promise<void>;
   onError: (mensaje: string) => void;
 }
 
@@ -36,7 +37,7 @@ function GoogleLoginButtonConfigured({ onSuccess, onError }: GoogleLoginButtonPr
     void (async () => {
       try {
         const respuesta = await loginGoogle(idToken);
-        await onSuccess(respuesta.token);
+        await onSuccess(respuesta.token, respuesta.usuario);
       } catch (error) {
         const mensaje =
           error instanceof ApiError
