@@ -8,7 +8,7 @@
  * La validación de acá es solo para UX: la fuente de verdad es el backend.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { type Href, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -283,7 +283,7 @@ export default function CrearMascotaScreen() {
       if (continuarAPublicacion && mascota.habilitaPublicacion) {
         router.replace({ pathname: '/publicaciones/crear', params: { mascotaId: mascota.id } });
       } else {
-        router.replace('/(tabs)');
+        router.replace('/(tabs)/mis-mascotas' as Href);
       }
     } catch (err) {
       // Se queda en la pantalla con todo lo cargado, para poder reintentar.

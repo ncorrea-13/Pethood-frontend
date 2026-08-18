@@ -1,11 +1,35 @@
 /**
- * Persistencia de la sesión. El token va en expo-secure-store (keychain / keystore),
- * nunca en AsyncStorage plano.
+ * Persistencia de la sesión. En nativo el token va en expo-secure-store
+ * (keychain / keystore), nunca en AsyncStorage plano. En web (solo debug)
+ * SecureStore no existe: caemos a localStorage.
  */
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 const CLAVE_TOKEN = 'pethood.token';
 const CLAVE_USUARIO = 'pethood.usuario';
+const ES_WEB = Platform.OS === 'web';
+
+async function leer(clave: string): Promise<string | null> {
+  if (ES_WEB) return window.localStorage.getItem(clave);
+  return SecureStore.getItemAsync(clave);
+}
+
+async function escribir(clave: string, valor: string): Promise<void> {
+  if (ES_WEB) {
+    window.localStorage.setItem(clave, valor);
+    return;
+  }
+  await SecureStore.setItemAsync(clave, valor);
+}
+
+async function borrar(clave: string): Promise<void> {
+  if (ES_WEB) {
+    window.localStorage.removeItem(clave);
+    return;
+  }
+  await SecureStore.deleteItemAsync(clave);
+}
 
 export interface UsuarioSesion {
   id: number;
@@ -15,23 +39,28 @@ export interface UsuarioSesion {
   verificado: boolean;
   refugioId: number | null;
   roles: string[];
+  imagenUrl?: string | null;
+  telefono?: string | null;
+  ubicacion?: string | null;
 }
 
 export function esRefugio(usuario: UsuarioSesion | null): boolean {
-  return usuario?.roles.includes('Refugio') ?? false;
+  return (
+    usuario?.roles.includes('Refugio') || usuario?.roles.includes('MIEMBRO_REFUGIO') || false
+  );
 }
 
 export async function obtenerToken(): Promise<string | null> {
-  return SecureStore.getItemAsync(CLAVE_TOKEN);
+  return leer(CLAVE_TOKEN);
 }
 
 export async function guardarSesion(token: string, usuario: UsuarioSesion): Promise<void> {
-  await SecureStore.setItemAsync(CLAVE_TOKEN, token);
-  await SecureStore.setItemAsync(CLAVE_USUARIO, JSON.stringify(usuario));
+  await escribir(CLAVE_TOKEN, token);
+  await escribir(CLAVE_USUARIO, JSON.stringify(usuario));
 }
 
 export async function obtenerUsuario(): Promise<UsuarioSesion | null> {
-  const guardado = await SecureStore.getItemAsync(CLAVE_USUARIO);
+  const guardado = await leer(CLAVE_USUARIO);
   if (!guardado) return null;
 
   try {
@@ -42,6 +71,6 @@ export async function obtenerUsuario(): Promise<UsuarioSesion | null> {
 }
 
 export async function borrarSesion(): Promise<void> {
-  await SecureStore.deleteItemAsync(CLAVE_TOKEN);
-  await SecureStore.deleteItemAsync(CLAVE_USUARIO);
+  await borrar(CLAVE_TOKEN);
+  await borrar(CLAVE_USUARIO);
 }
