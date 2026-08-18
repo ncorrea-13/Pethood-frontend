@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: var(--color-pethood-beige);
   --foreground: #171717;
   /* Identidad visual PetHood — CLAUDE.md, misma paleta que apps/mobile/tailwind.config.js */
   --color-pethood-orange: #ff9d5c;
@@ -34,4 +34,25 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes dashboard-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dashboard-in {
+  animation: dashboard-fade-in 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-dashboard-in {
+    animation: none;
+  }
 }

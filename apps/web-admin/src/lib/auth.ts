@@ -5,12 +5,13 @@ export const AUTH_COOKIE = "phd_token";
 
 export interface Sesion {
   id: number;
-  email: string;
   roles: RolUsuario[];
 }
 
 // Decodifica el payload del JWT sin verificar firma — solo para UX (routing/nav condicional).
 // La autorización real siempre la valida el backend (CLAUDE.md: "validar en el cliente es solo para UX").
+// El payload (backend/src/shared/jwt.ts) solo firma usuarioId y roles, nunca email — el login
+// real todavía no está integrado (src/app/(auth)/login/page.tsx), así que no hay de dónde sacarlo.
 export function decodeSesion(token: string | undefined | null): Sesion | null {
   if (!token) return null;
 
@@ -22,7 +23,7 @@ export function decodeSesion(token: string | undefined | null): Sesion | null {
     const json = atob(base64);
     const data = JSON.parse(json);
     if (!data?.usuarioId || !Array.isArray(data?.roles)) return null;
-    return { id: data.usuarioId, email: data.email, roles: data.roles };
+    return { id: data.usuarioId, roles: data.roles };
   } catch {
     return null;
   }

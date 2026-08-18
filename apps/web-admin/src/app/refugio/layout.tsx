@@ -15,7 +15,7 @@ export default async function RefugioLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Topbar email={sesion.email} />
+      <Topbar rol="Refugio" />
       <div className="flex flex-1">
         <RefugioSidebar />
         <main className="flex-1 p-6">{children}</main>

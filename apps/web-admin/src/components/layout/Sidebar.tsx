@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, type ReactNode } from "react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export interface SidebarLink {
   href: string;
   label: string;
+  icono: ReactNode;
 }
 
 interface SidebarProps {
@@ -15,12 +18,25 @@ interface SidebarProps {
 
 export function Sidebar({ titulo, links }: SidebarProps) {
   const pathname = usePathname();
+  const [colapsado, setColapsado] = useState(false);
 
   return (
-    <aside className="w-60 shrink-0 border-r border-neutral-200 bg-white p-4">
-      <p className="mb-4 px-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
-        {titulo}
-      </p>
+    <aside
+      className={`shrink-0 bg-neutral-900 p-4 transition-[width] duration-200 ${colapsado ? "w-16" : "w-60"}`}
+    >
+      <div className={`mb-4 flex items-center ${colapsado ? "justify-center" : "justify-between px-2"}`}>
+        {!colapsado && (
+          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{titulo}</p>
+        )}
+        <button
+          type="button"
+          onClick={() => setColapsado((v) => !v)}
+          className="rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
+          aria-label={colapsado ? "Expandir menú" : "Colapsar menú"}
+        >
+          {colapsado ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        </button>
+      </div>
       <nav className="flex flex-col gap-1">
         {links.map((link) => {
           const activo = pathname.startsWith(link.href);
@@ -28,13 +44,17 @@ export function Sidebar({ titulo, links }: SidebarProps) {
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-md px-3 py-2 text-sm font-medium ${
+              title={colapsado ? link.label : undefined}
+              className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                colapsado ? "justify-center" : ""
+              } ${
                 activo
-                  ? "bg-pethood-orange/10 text-pethood-orange"
-                  : "text-neutral-700 hover:bg-neutral-100"
+                  ? "bg-pethood-orange text-white"
+                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
-              {link.label}
+              {link.icono}
+              {!colapsado && link.label}
             </Link>
           );
         })}
