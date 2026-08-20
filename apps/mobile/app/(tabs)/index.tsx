@@ -1,5 +1,6 @@
 /** Home autenticada — acceso visual a las secciones principales. */
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import {
   ImageBackground,
   type ImageSourcePropType,
@@ -97,6 +98,7 @@ function TarjetaAcceso({ tarjeta }: { tarjeta: TarjetaHome }) {
 
 export default function InicioScreen() {
   const { usuario } = useSesion();
+  const router = useRouter();
   const nombre = usuario?.nombre?.trim();
 
   return (
@@ -114,6 +116,7 @@ export default function InicioScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Favoritos"
+              onPress={() => router.push('/favoritos')}
               className="h-10 w-10 items-center justify-center rounded-full bg-white active:opacity-80"
             >
               <Ionicons name="heart" size={22} color="#FF9D5C" />

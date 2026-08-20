@@ -1,7 +1,7 @@
 /**
  * GUI-09 Mi Perfil — HU-1.3 visualizar, HU-1.5 completar, HU-1.7 cierre de sesión.
- * El engranaje abre la edición. Las filas del menú se muestran pero no navegan
- * porque esas secciones todavía no están desarrolladas.
+ * El engranaje abre la edición. Las filas del menú solo navegan cuando su sección ya
+ * existe; el resto se muestra desactivado hasta que se implemente.
  */
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
@@ -25,10 +25,11 @@ import type { Perfil } from '@/types/auth';
 
 type NombreIcono = keyof typeof Ionicons.glyphMap;
 
-const MENU: { icono: NombreIcono; label: string }[] = [
-  { icono: 'paw-outline', label: 'Mis mascotas' },
+/** Sin `ruta`, la fila queda visible pero desactivada: esa sección todavía no existe. */
+const MENU: { icono: NombreIcono; label: string; ruta?: Href }[] = [
+  { icono: 'paw-outline', label: 'Mis mascotas', ruta: '/(tabs)/mis-mascotas' },
   { icono: 'document-text-outline', label: 'Mis solicitudes' },
-  { icono: 'heart-outline', label: 'Favoritos' },
+  { icono: 'heart-outline', label: 'Favoritos', ruta: '/favoritos' },
   { icono: 'heart-circle-outline', label: 'Campañas' },
 ];
 
@@ -182,19 +183,22 @@ export default function PerfilScreen() {
             </View>
 
             <View className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-sm">
-              {MENU.map((item, index) => (
-                <View
-                  key={item.label}
+              {MENU.map(({ icono, label, ruta }, index) => (
+                <Pressable
+                  key={label}
+                  accessibilityRole="button"
+                  disabled={!ruta}
+                  onPress={ruta ? () => router.push(ruta) : undefined}
                   className={`flex-row items-center px-4 py-3.5 ${
                     index < MENU.length - 1 ? 'border-b border-gray-100' : ''
-                  }`}
+                  } ${ruta ? 'active:bg-gray-50' : 'opacity-40'}`}
                 >
                   <View className="h-9 w-9 items-center justify-center rounded-xl bg-orange-50">
-                    <Ionicons name={item.icono} size={18} color="#FF9D5C" />
+                    <Ionicons name={icono} size={18} color="#FF9D5C" />
                   </View>
-                  <Text className="ml-3 flex-1 text-base text-gray-800">{item.label}</Text>
+                  <Text className="ml-3 flex-1 text-base text-gray-800">{label}</Text>
                   <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
-                </View>
+                </Pressable>
               ))}
             </View>
 
