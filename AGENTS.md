@@ -19,7 +19,12 @@ Cada app es un proyecto npm independiente (propio `package.json`/lockfile) — n
 - `ARQUITECTURA.md` — árbol de directorios de ambos repos y convención de branches.
 - `specs/` — spec aprobada del módulo, a leer antes de implementar cualquier pantalla.
 
-**Antes de cualquier modificación, releer `../Pethood-backend/docs/ARQUITECTURA.md`, `../Pethood-backend/docs/ROADMAP.md` y `../Pethood-backend/docs/CONSTITUTION.md`** — definen cómo se organiza el código, en qué orden se construye y qué reglas son innegociables, y aplican igual a este repo.
+No se leen completas en cada cambio: consultá solo lo que la tarea toque.
+
+- Implementás o modificás una pantalla → su spec aprobada en `specs/` y los textos/reglas exactas de `REQUISITOS.md` (§5 feedback voseo, §7 habilitación de botones).
+- Dudás sobre nombres de campo, tipos o cardinalidades → `MODELO_DATOS.md`.
+- Creás estructura nueva (app, directorios de primer nivel) → árbol de directorios en `ARQUITECTURA.md`.
+- Duda sobre un principio no negociable → `CONSTITUTION.md` (las reglas transversales ya están resumidas más abajo, en Convenciones).
 
 ## Por qué dos apps separadas
 
