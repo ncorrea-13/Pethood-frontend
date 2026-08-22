@@ -9,6 +9,11 @@ export interface CustomButtonProps extends Omit<PressableProps, 'children'> {
   title: string;
   loading?: boolean;
   variant?: 'primary' | 'secondary';
+  /**
+   * Se llama al tocar el botón mientras está deshabilitado, para poder explicar qué falta
+   * en vez de no responder. Nunca dispara `onPress`.
+   */
+  onPressDeshabilitado?: () => void;
 }
 
 export function CustomButton({
@@ -16,6 +21,8 @@ export function CustomButton({
   loading = false,
   variant = 'primary',
   disabled,
+  onPress,
+  onPressDeshabilitado,
   className = '',
   ...pressableProps
 }: CustomButtonProps) {
@@ -32,8 +39,11 @@ export function CustomButton({
   return (
     <Pressable
       accessibilityRole="button"
+      // Se anuncia como deshabilitado, pero sigue recibiendo el toque para poder explicar
+      // qué falta. Mientras carga sí se bloquea, para no reenviar el formulario.
       accessibilityState={{ disabled: isDisabled, busy: loading }}
-      disabled={isDisabled}
+      disabled={loading}
+      onPress={isDisabled ? onPressDeshabilitado : onPress}
       className={`w-full items-center justify-center rounded-2xl py-4 ${variantClasses} ${
         isDisabled ? 'opacity-60' : ''
       } ${className}`}
