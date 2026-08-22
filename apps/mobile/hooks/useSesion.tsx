@@ -8,8 +8,10 @@ import {
   esMiembroDeRefugio,
   guardarSesion,
   guardarUsuario,
+  guardarVistaRefugio,
   obtenerToken,
   obtenerUsuario,
+  obtenerVistaRefugio,
 } from '@/services/sesion';
 import type { Usuario } from '@/types/auth';
 
@@ -21,6 +23,9 @@ interface ContextoSesion {
   /** Mientras se lee la sesión guardada, para no parpadear entre login y home. */
   cargando: boolean;
   esRefugio: boolean;
+  /** Si está viendo la app como refugio. Nunca es `true` para quien no pertenece a uno. */
+  vistaRefugio: boolean;
+  cambiarVistaRefugio: (activa: boolean) => Promise<void>;
   establecerSesion: (token: string, usuario: Usuario) => Promise<void>;
   actualizarUsuario: (usuario: Usuario) => Promise<void>;
   iniciarSesion: (email: string, contrasena: string) => Promise<void>;
@@ -43,14 +48,21 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [vistaRefugioElegida, setVistaRefugioElegida] = useState(false);
 
   useEffect(() => {
-    void Promise.all([obtenerToken(), obtenerUsuario()])
-      .then(([tokenGuardado, usuarioGuardado]) => {
+    void Promise.all([obtenerToken(), obtenerUsuario(), obtenerVistaRefugio()])
+      .then(([tokenGuardado, usuarioGuardado, vistaGuardada]) => {
         setToken(tokenGuardado);
         setUsuario(usuarioGuardado);
+        setVistaRefugioElegida(vistaGuardada);
       })
       .finally(() => setCargando(false));
+  }, []);
+
+  const cambiarVistaRefugio = useCallback(async (activa: boolean) => {
+    setVistaRefugioElegida(activa);
+    await guardarVistaRefugio(activa);
   }, []);
 
   const establecerSesion = useCallback(async (nuevoToken: string, nuevoUsuario: Usuario) => {
@@ -76,11 +88,14 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     const tokenActual = token;
     setToken(null);
     setUsuario(null);
+    setVistaRefugioElegida(false);
     await borrarSesion();
     if (tokenActual) {
       await authService.logout(tokenActual).catch(() => undefined);
     }
   }, [token]);
+
+  const esRefugio = esMiembroDeRefugio(usuario);
 
   const valor = useMemo<ContextoSesion>(
     () => ({
@@ -88,13 +103,28 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       token,
       autenticado: Boolean(token),
       cargando,
-      esRefugio: esMiembroDeRefugio(usuario),
+      esRefugio,
+      // Se cruza con el rol y no se usa el valor guardado tal cual: si al usuario le sacan
+      // el refugio, la app tiene que volver sola a la vista de adoptante.
+      vistaRefugio: esRefugio && vistaRefugioElegida,
+      cambiarVistaRefugio,
       establecerSesion,
       actualizarUsuario,
       iniciarSesion,
       cerrarSesion,
     }),
-    [usuario, token, cargando, establecerSesion, actualizarUsuario, iniciarSesion, cerrarSesion],
+    [
+      usuario,
+      token,
+      cargando,
+      esRefugio,
+      vistaRefugioElegida,
+      cambiarVistaRefugio,
+      establecerSesion,
+      actualizarUsuario,
+      iniciarSesion,
+      cerrarSesion,
+    ],
   );
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;

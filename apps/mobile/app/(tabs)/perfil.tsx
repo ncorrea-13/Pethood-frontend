@@ -18,7 +18,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useToast } from '@/components/feedback/Toast';
+import { BotonCircular } from '@/components/ui/BotonCircular';
 import { Chip } from '@/components/ui/Chip';
+import { SwitchRefugio } from '@/components/ui/SwitchRefugio';
+import { PALETA } from '@/constants/theme';
 import { useSesion } from '@/hooks/useSesion';
 import { ApiError, urlAbsoluta } from '@/services/api';
 import { obtenerPerfil } from '@/services/usuarios';
@@ -54,7 +57,15 @@ function formatearValoracion(valor: number | null | undefined): string {
 export default function PerfilScreen() {
   const router = useRouter();
   const toast = useToast();
-  const { usuario, token, esRefugio, actualizarUsuario, cerrarSesion } = useSesion();
+  const {
+    usuario,
+    token,
+    esRefugio,
+    vistaRefugio,
+    cambiarVistaRefugio,
+    actualizarUsuario,
+    cerrarSesion,
+  } = useSesion();
 
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -82,6 +93,13 @@ export default function PerfilScreen() {
     }, [cargar]),
   );
 
+  // Cambiar de vista cambia la app entera, no solo esta pantalla: se va a Inicio para que
+  // se vea, en vez de dejar al usuario mirando un interruptor que aparentemente no hizo nada.
+  const alternarVista = async (activa: boolean): Promise<void> => {
+    await cambiarVistaRefugio(activa);
+    router.push('/(tabs)' as Href);
+  };
+
   const salir = async (): Promise<void> => {
     await cerrarSesion();
     router.replace('/login');
@@ -96,19 +114,17 @@ export default function PerfilScreen() {
       <SafeAreaView className="flex-1" edges={['top']}>
         <View className="flex-row items-center justify-between px-5 pb-2 pt-3">
           <Text className="text-2xl font-bold text-pethood-orange">Mi Perfil</Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Editar perfil"
+          <BotonCircular
+            icono="settings-outline"
+            etiqueta="Editar perfil"
+            variante="clasico"
             onPress={() => router.push('/perfil/editar' as Href)}
-            className="h-10 w-10 items-center justify-center rounded-full bg-white"
-          >
-            <Ionicons name="settings-outline" size={22} color="#FF9D5C" />
-          </Pressable>
+          />
         </View>
 
         {cargando && !visible ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator color="#FF9D5C" />
+            <ActivityIndicator color={PALETA.pethood.naranja} />
           </View>
         ) : (
           <ScrollView
@@ -181,6 +197,13 @@ export default function PerfilScreen() {
               </View>
             </View>
 
+            {/* Solo para quien administra un refugio: el resto no tiene qué alternar. */}
+            {esRefugio ? (
+              <View className="mt-4">
+                <SwitchRefugio activo={vistaRefugio} onCambiar={alternarVista} />
+              </View>
+            ) : null}
+
             <View className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-sm">
               {MENU.map(({ icono, label, ruta }, index) => (
                 <Pressable
@@ -193,10 +216,10 @@ export default function PerfilScreen() {
                   } ${ruta ? 'active:bg-gray-50' : 'opacity-40'}`}
                 >
                   <View className="h-9 w-9 items-center justify-center rounded-xl bg-orange-50">
-                    <Ionicons name={icono} size={18} color="#FF9D5C" />
+                    <Ionicons name={icono} size={18} color={PALETA.pethood.naranja} />
                   </View>
                   <Text className="ml-3 flex-1 text-base text-gray-800">{label}</Text>
-                  <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
+                  <Ionicons name="chevron-forward" size={18} color={PALETA.gris[300]} />
                 </Pressable>
               ))}
             </View>
@@ -206,7 +229,7 @@ export default function PerfilScreen() {
               onPress={() => void salir()}
               className="mt-6 flex-row items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white py-4 active:opacity-80"
             >
-              <Ionicons name="log-out-outline" size={20} color="#DC2626" />
+              <Ionicons name="log-out-outline" size={20} color={PALETA.estado.error} />
               <Text className="text-base font-semibold text-red-600">Cerrar sesión</Text>
             </Pressable>
           </ScrollView>
