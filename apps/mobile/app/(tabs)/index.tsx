@@ -1,6 +1,6 @@
 /** Home autenticada — acceso visual a las secciones principales. */
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import {
   ImageBackground,
   type ImageSourcePropType,
@@ -20,6 +20,8 @@ interface TarjetaHome {
   icono: NombreIcono;
   overlay: string;
   imagen: ImageSourcePropType;
+  /** Destino de la tarjeta. Sin esto queda inerte, hasta que exista la pantalla. */
+  destino?: Href;
 }
 
 const TARJETAS: TarjetaHome[] = [
@@ -49,6 +51,7 @@ const TARJETAS: TarjetaHome[] = [
     imagen: {
       uri: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=900&q=80',
     },
+    destino: '/(tabs)/adoptar',
   },
   {
     titulo: 'Ayudanos con estas causas',
@@ -68,10 +71,14 @@ function saludoSegunHora(): string {
   return 'Buenas noches';
 }
 
-function TarjetaAcceso({ tarjeta }: { tarjeta: TarjetaHome }) {
+function TarjetaAcceso({ tarjeta, onPress }: { tarjeta: TarjetaHome; onPress?: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={`${tarjeta.titulo} ${tarjeta.cta}`}
+      // Las tarjetas sin destino todavía no tienen pantalla: se ven, pero no responden.
+      accessibilityState={{ disabled: !onPress }}
+      onPress={onPress}
       className="min-h-[118px] flex-1 overflow-hidden rounded-[28px] bg-neutral-500 active:opacity-90"
     >
       <ImageBackground
@@ -138,7 +145,11 @@ export default function InicioScreen() {
 
         <View className="flex-1 gap-3 px-5 pb-3">
           {TARJETAS.map((tarjeta) => (
-            <TarjetaAcceso key={tarjeta.cta} tarjeta={tarjeta} />
+            <TarjetaAcceso
+              key={tarjeta.cta}
+              tarjeta={tarjeta}
+              onPress={tarjeta.destino ? () => router.push(tarjeta.destino!) : undefined}
+            />
           ))}
         </View>
       </SafeAreaView>
