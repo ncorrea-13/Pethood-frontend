@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs, useRouter } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { BotonTabCentral } from '@/components/ui/BotonTabCentral';
 
 /**
  * Navegación inferior del área autenticada.
  *
- * El diseño de referencia: Inicio, Mascotas, acción central, Chat, Perfil.
+ * El diseño de referencia: Inicio, Mascotas, Adoptar, Chat, Perfil.
  * La pestaña Mapa del prototipo queda fuera porque el proyecto excluye el mapa interactivo.
  */
 export default function TabsLayout() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const paddingBottom = Math.max(insets.bottom, 12);
 
@@ -48,25 +48,20 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="paw-outline" size={size} color={color} />,
         }}
       />
+      {/* Es una tab real y no un atajo a otra ruta: la barra inferior queda presente sobre
+          el mazo de tarjetas, con este botón resaltado. */}
       <Tabs.Screen
-        name="accion"
+        name="adoptar"
         options={{
           title: '',
           tabBarLabel: () => null,
-          tabBarButton: () => (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Crear mascota"
-              onPress={() => router.push('/mascotas/crear')}
-              className="-top-5 items-center justify-start"
-            >
-              <View
-                className="h-14 w-14 items-center justify-center rounded-full shadow-md"
-                style={{ backgroundColor: '#E8C04A' }}
-              >
-                <Ionicons name="paw" size={26} color="#FFFFFF" />
-              </View>
-            </Pressable>
+          tabBarButton: ({ onPress, accessibilityState }) => (
+            <BotonTabCentral
+              icono="paw"
+              etiqueta="Adoptar"
+              activo={Boolean(accessibilityState?.selected)}
+              onPress={onPress}
+            />
           ),
         }}
       />
