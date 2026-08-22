@@ -25,8 +25,12 @@ import { PALETA } from '@/constants/theme';
 
 const DIAMETRO = 64;
 
-/** Cuánto sobresale por encima de la barra. */
-const ELEVACION = 12;
+/**
+ * Cuánto sobresale por encima de la barra. Lo suficiente para que el círculo tape la
+ * barrita del indicador, que corre por el borde superior: con menos, las puntas de la
+ * barrita asoman por los costados del círculo.
+ */
+const ELEVACION = 18;
 
 interface BotonTabCentralProps {
   icono: keyof typeof Ionicons.glyphMap;
