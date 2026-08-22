@@ -35,6 +35,7 @@ import { SelectField, type OpcionSelect } from '@/components/ui/SelectField';
 import { TextAreaField } from '@/components/ui/TextAreaField';
 import { TextField } from '@/components/ui/TextField';
 import { ToggleField } from '@/components/ui/ToggleField';
+import { PALETA } from '@/constants/theme';
 import { urlAbsoluta } from '@/services/api';
 import { listarEspecies, listarRazas, type OpcionCatalogo } from '@/services/catalogos';
 import {
@@ -319,7 +320,7 @@ export default function EditarMascotaScreen() {
             hitSlop={8}
             className="h-10 w-10 items-center justify-center rounded-full bg-white active:opacity-80"
           >
-            <Ionicons name="chevron-back" size={20} color="#4B5563" />
+            <Ionicons name="chevron-back" size={20} color={PALETA.gris[600]} />
           </Pressable>
 
           <Text className="text-2xl font-bold text-pethood-orange">Editar mascota</Text>

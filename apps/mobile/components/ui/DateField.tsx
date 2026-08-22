@@ -9,6 +9,7 @@ import { Platform, Pressable, Text } from 'react-native';
 import { aFechaVisible, edadEnTexto } from '../../shared/validation/dates';
 import { LIMITES } from '../../shared/validation/limits';
 import { claseValor, FormField } from './FormField';
+import { PALETA } from '@/constants/theme';
 
 interface DateFieldProps {
   label: string;
@@ -54,7 +55,7 @@ export function DateField({
         <Text className={`flex-1 ${claseValor(Boolean(error), !valor)}`}>
           {valor ? aFechaVisible(valor) : placeholder}
         </Text>
-        <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
+        <Ionicons name="calendar-outline" size={18} color={PALETA.gris[400]} />
       </Pressable>
 
       {/* En Android es un diálogo y no ocupa lugar; en iOS se muestra embebido y necesita

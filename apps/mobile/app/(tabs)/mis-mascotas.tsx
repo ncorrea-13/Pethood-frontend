@@ -12,6 +12,7 @@ import { EstadoCargando, EstadoError } from '@/components/feedback/EstadosPantal
 import { useToast } from '@/components/feedback/Toast';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EstadoMascotaBadge } from '@/components/ui/EstadoMascotaBadge';
+import { PALETA } from '@/constants/theme';
 import { useSesion } from '@/hooks/useSesion';
 import { ApiError, urlAbsoluta } from '@/services/api';
 import { eliminarMascota, listarMisMascotas, type Mascota } from '@/services/mascotas';
@@ -45,7 +46,7 @@ function TarjetaMascota({ mascota, esPropia, onEditar, onEliminar }: TarjetaMasc
         <Image source={{ uri: foto }} className="h-28 w-28 rounded-xl" />
       ) : (
         <View className="h-28 w-28 items-center justify-center rounded-xl bg-gray-100">
-          <Ionicons name="paw-outline" size={28} color="#9CA3AF" />
+          <Ionicons name="paw-outline" size={28} color={PALETA.gris[400]} />
         </View>
       )}
 
@@ -73,7 +74,7 @@ function TarjetaMascota({ mascota, esPropia, onEditar, onEliminar }: TarjetaMasc
                 hitSlop={6}
                 className="h-9 w-9 items-center justify-center rounded-full bg-gray-100 active:opacity-70"
               >
-                <Ionicons name="pencil" size={16} color="#4B5563" />
+                <Ionicons name="pencil" size={16} color={PALETA.gris[600]} />
               </Pressable>
 
               <Pressable
@@ -83,7 +84,7 @@ function TarjetaMascota({ mascota, esPropia, onEditar, onEliminar }: TarjetaMasc
                 hitSlop={6}
                 className="h-9 w-9 items-center justify-center rounded-full bg-red-50 active:opacity-70"
               >
-                <Ionicons name="trash-outline" size={16} color="#DC2626" />
+                <Ionicons name="trash-outline" size={16} color={PALETA.estado.error} />
               </Pressable>
             </View>
           ) : null}
@@ -97,7 +98,7 @@ function ListaVacia() {
   return (
     <View className="items-center px-8 py-16">
       <View className="mb-5 h-24 w-24 items-center justify-center rounded-full bg-white">
-        <Ionicons name="paw-outline" size={44} color="#FF9D5C" />
+        <Ionicons name="paw-outline" size={44} color={PALETA.pethood.naranja} />
       </View>
 
       <Text className="text-center text-lg font-bold text-gray-900">
@@ -109,7 +110,7 @@ function ListaVacia() {
 
       <View className="mt-5 flex-row items-center gap-2 rounded-full bg-white px-4 py-2.5">
         <View className="h-7 w-7 items-center justify-center rounded-full bg-pethood-orange">
-          <Ionicons name="add" size={18} color="#FFFFFF" />
+          <Ionicons name="add" size={18} color={PALETA.blanco} />
         </View>
         <Text className="text-sm text-gray-600">Tocá el botón para empezar</Text>
       </View>
@@ -230,7 +231,7 @@ export default function MisMascotasScreen() {
                   setRefrescando(true);
                   void cargar();
                 }}
-                tintColor="#FF9D5C"
+                tintColor={PALETA.pethood.naranja}
               />
             }
           />
@@ -243,7 +244,7 @@ export default function MisMascotasScreen() {
             accessibilityLabel={esRefugio ? 'Crear mascota del refugio' : 'Crear mascota'}
             className="absolute bottom-6 right-6 h-16 w-16 items-center justify-center rounded-full bg-pethood-orange shadow-lg active:opacity-90"
           >
-            <Ionicons name="add" size={32} color="#FFFFFF" />
+            <Ionicons name="add" size={32} color={PALETA.blanco} />
           </Pressable>
         </Link>
       </SafeAreaView>

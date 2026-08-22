@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { claseValor, FormField } from './FormField';
 import { validarTexto } from '../../shared/validation/text';
+import { PALETA } from '@/constants/theme';
 
 interface TagInputFieldProps {
   label: string;
@@ -59,7 +60,7 @@ export function TagInputField({
         <TextInput
           className={`flex-1 ${claseValor(Boolean(error ?? errorLocal), !borrador)} p-0`}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={PALETA.gris[400]}
           value={borrador}
           onChangeText={(texto) => {
             setBorrador(texto);
@@ -80,7 +81,7 @@ export function TagInputField({
             borrador.trim() ? 'bg-pethood-orange active:opacity-80' : 'bg-gray-100'
           }`}
         >
-          <Ionicons name="add" size={15} color={borrador.trim() ? '#FFFFFF' : '#9CA3AF'} />
+          <Ionicons name="add" size={15} color={borrador.trim() ? PALETA.blanco : PALETA.gris[400]} />
           <Text
             className={`text-xs font-semibold ${borrador.trim() ? 'text-white' : 'text-gray-400'}`}
           >
@@ -104,7 +105,7 @@ export function TagInputField({
                 onPress={() => quitar(etiqueta)}
                 hitSlop={6}
               >
-                <Ionicons name="close-circle" size={16} color="#FF9D5C" />
+                <Ionicons name="close-circle" size={16} color={PALETA.pethood.naranja} />
               </Pressable>
             </View>
           ))}

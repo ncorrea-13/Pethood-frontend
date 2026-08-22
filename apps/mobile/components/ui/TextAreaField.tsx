@@ -2,6 +2,7 @@
 import { TextInput } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import { claseValor, FormField } from './FormField';
+import { PALETA } from '@/constants/theme';
 
 interface TextAreaFieldProps extends Omit<TextInputProps, 'className' | 'multiline'> {
   label: string;
@@ -28,7 +29,7 @@ export function TextAreaField({
     >
       <TextInput
         className={`${claseValor(Boolean(error), !value)} min-h-[72px] p-0`}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={PALETA.gris[400]}
         multiline
         textAlignVertical="top"
         maxLength={maximo}

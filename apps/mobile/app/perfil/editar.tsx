@@ -23,6 +23,7 @@ import { CustomButton } from '@/components/CustomButton';
 import { useToast } from '@/components/feedback/Toast';
 import { FormCard, FormCardRow } from '@/components/ui/FormCard';
 import { TextField } from '@/components/ui/TextField';
+import { PALETA } from '@/constants/theme';
 import { useSesion } from '@/hooks/useSesion';
 import type { ArchivoImagenLocal } from '@/lib/formDataImagen';
 import {
@@ -270,14 +271,14 @@ export default function EditarPerfilScreen() {
             accessibilityRole="button"
             accessibilityLabel="Volver"
           >
-            <Ionicons name="arrow-back" size={22} color="#374151" />
+            <Ionicons name="arrow-back" size={22} color={PALETA.gris[700]} />
           </Pressable>
           <Text className="text-2xl font-bold text-pethood-orange">Editar Perfil</Text>
         </View>
 
         {cargando ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator color="#FF9D5C" />
+            <ActivityIndicator color={PALETA.pethood.naranja} />
           </View>
         ) : (
           <KeyboardAvoidingView
@@ -306,7 +307,7 @@ export default function EditarPerfilScreen() {
                     </View>
                   )}
                   <View className="absolute bottom-0 right-0 h-9 w-9 items-center justify-center rounded-full bg-pethood-orange">
-                    <Ionicons name="camera" size={16} color="#FFFFFF" />
+                    <Ionicons name="camera" size={16} color={PALETA.blanco} />
                   </View>
                 </Pressable>
               </View>

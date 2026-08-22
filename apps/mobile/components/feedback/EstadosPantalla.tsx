@@ -6,12 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
+import { PALETA } from '@/constants/theme';
+
 type NombreIcono = keyof typeof Ionicons.glyphMap;
 
 export function EstadoCargando() {
   return (
     <View className="flex-1 items-center justify-center">
-      <ActivityIndicator size="large" color="#FF9D5C" />
+      <ActivityIndicator size="large" color={PALETA.pethood.naranja} />
     </View>
   );
 }
@@ -36,7 +38,7 @@ export function EstadoError({
 }: EstadoErrorProps) {
   return (
     <View className="flex-1 items-center justify-center px-6">
-      <Ionicons name={icono} size={40} color="#9CA3AF" />
+      <Ionicons name={icono} size={40} color={PALETA.gris[400]} />
       <Text className="mt-3 text-center text-base text-gray-600">{mensaje}</Text>
 
       <Pressable
@@ -62,7 +64,7 @@ export function EstadoVacio({ icono, titulo, descripcion, children }: EstadoVaci
   return (
     <View className="flex-1 items-center justify-center px-8 py-16">
       <View className="mb-5 h-24 w-24 items-center justify-center rounded-full bg-white">
-        <Ionicons name={icono} size={44} color="#FF9D5C" />
+        <Ionicons name={icono} size={44} color={PALETA.pethood.naranja} />
       </View>
 
       <Text className="text-center text-lg font-bold text-gray-900">{titulo}</Text>

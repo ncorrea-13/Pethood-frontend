@@ -10,6 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Pressable, Text, View } from 'react-native';
 import { LIMITES } from '../../shared/validation/limits';
+import { PALETA } from '@/constants/theme';
 
 export interface FotoElegida {
   uri: string;
@@ -141,7 +142,7 @@ export function PhotoPicker({
               hitSlop={8}
               className="absolute right-3 top-3 h-9 w-9 items-center justify-center rounded-full bg-black/50 active:opacity-80"
             >
-              <Ionicons name="close" size={20} color="#FFFFFF" />
+              <Ionicons name="close" size={20} color={PALETA.blanco} />
             </Pressable>
           ) : null}
 
@@ -150,7 +151,7 @@ export function PhotoPicker({
             onPress={elegir}
             className="absolute bottom-3 right-3 flex-row items-center gap-1.5 rounded-full bg-black/50 px-3 py-2 active:opacity-80"
           >
-            <Ionicons name="camera-outline" size={16} color="#FFFFFF" />
+            <Ionicons name="camera-outline" size={16} color={PALETA.blanco} />
             <Text className="text-xs font-medium text-white">Cambiar</Text>
           </Pressable>
         </View>
@@ -165,10 +166,10 @@ export function PhotoPicker({
           }`}
         >
           {cargando ? (
-            <ActivityIndicator color="#FF9D5C" />
+            <ActivityIndicator color={PALETA.pethood.naranja} />
           ) : (
             <>
-              <Ionicons name="camera-outline" size={28} color="#FF9D5C" />
+              <Ionicons name="camera-outline" size={28} color={PALETA.pethood.naranja} />
               <Text className="mt-1.5 text-sm font-medium text-gray-500">Agregar fotos</Text>
             </>
           )}

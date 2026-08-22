@@ -11,6 +11,8 @@ import type { ReactNode } from 'react';
 import { Animated, Platform, Pressable, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PALETA } from '@/constants/theme';
+
 export type TipoToast = 'exito' | 'advertencia' | 'error';
 
 /**
@@ -81,7 +83,7 @@ function ToastVisible({ toast, onCerrar }: { toast: Toast; onCerrar: () => void 
         accessibilityRole="alert"
         className={`flex-row items-center rounded-2xl px-4 py-3.5 shadow-lg ${estilo.fondo}`}
       >
-        <Ionicons name={estilo.icono} size={22} color="#FFFFFF" />
+        <Ionicons name={estilo.icono} size={22} color={PALETA.blanco} />
         <Text className="ml-3 flex-1 text-base font-medium text-white">{toast.mensaje}</Text>
 
         {/* Pressable anidado: en RN el hijo captura el toque y no burbujea al padre, así

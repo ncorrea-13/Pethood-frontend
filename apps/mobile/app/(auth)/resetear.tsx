@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { useToast } from '@/components/feedback/Toast';
+import { PALETA } from '@/constants/theme';
 import {
   validarCodigoRecuperacion,
   validarConfirmacionPassword,
@@ -87,7 +88,7 @@ export default function ResetearScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Volver"
               >
-                <Ionicons name="arrow-back" size={22} color="#374151" />
+                <Ionicons name="arrow-back" size={22} color={PALETA.gris[700]} />
               </Pressable>
               <Text className="text-2xl font-bold text-pethood-orange">Nueva contraseña</Text>
             </View>
@@ -132,7 +133,7 @@ export default function ResetearScreen() {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color="#9CA3AF"
+                  color={PALETA.gris[400]}
                 />
               }
               onRightIconPress={() => setShowPassword((prev) => !prev)}
@@ -153,7 +154,7 @@ export default function ResetearScreen() {
                 <Ionicons
                   name={showConfirmacion ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color="#9CA3AF"
+                  color={PALETA.gris[400]}
                 />
               }
               onRightIconPress={() => setShowConfirmacion((prev) => !prev)}
