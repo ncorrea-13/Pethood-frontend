@@ -18,6 +18,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useToast } from '@/components/feedback/Toast';
+import { Chip } from '@/components/ui/Chip';
 import { useSesion } from '@/hooks/useSesion';
 import { ApiError, urlAbsoluta } from '@/services/api';
 import { obtenerPerfil } from '@/services/usuarios';
@@ -152,10 +153,8 @@ export default function PerfilScreen() {
                       </Text>
                     </Pressable>
                   ) : null}
-                  <View className="mt-2 self-start rounded-full bg-orange-50 px-3 py-1">
-                    <Text className="text-xs font-medium text-pethood-orange">
-                      {etiquetaRol(visible?.roles ?? [], esRefugio)}
-                    </Text>
+                  <View className="mt-2">
+                    <Chip etiqueta={etiquetaRol(visible?.roles ?? [], esRefugio)} />
                   </View>
                 </View>
               </View>

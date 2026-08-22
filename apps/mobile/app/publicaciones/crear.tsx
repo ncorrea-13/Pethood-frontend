@@ -8,7 +8,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -19,6 +18,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomButton } from '@/components/CustomButton';
+import { EstadoCargando } from '@/components/feedback/EstadosPantalla';
 import { useToast } from '@/components/feedback/Toast';
 import { ChipMultiField } from '@/components/ui/ChipMultiField';
 import { FormCard, FormCardRow } from '@/components/ui/FormCard';
@@ -36,6 +36,11 @@ import { validarTexto } from '@/shared/validation/text';
 /**
  * Rasgos de prueba hasta que exista un catálogo propio. Cuando se defina, salen de la API
  * como el resto de los catálogos.
+ *
+ * "Bueno con chicos" y "Bueno con otras mascotas" no son rasgos cualquiera: son los dos
+ * que resuelven los toggles de "Compatible con" del filtro de Adoptar. El backend los
+ * matchea por texto exacto (`publicaciones.dto.ts`), así que cambiar la redacción de
+ * cualquiera de los dos rompe el filtro en silencio.
  */
 const RASGOS_DE_PERSONALIDAD = [
   'Juguetón',
@@ -46,6 +51,7 @@ const RASGOS_DE_PERSONALIDAD = [
   'Sociable',
   'Independiente',
   'Bueno con chicos',
+  'Bueno con otras mascotas',
 ];
 
 interface ErroresFormulario {
@@ -190,9 +196,7 @@ export default function CrearPublicacionScreen() {
         </View>
 
         {cargandoMascotas ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#FF9D5C" />
-          </View>
+          <EstadoCargando />
         ) : (
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}

@@ -5,9 +5,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { EstadoCargando, EstadoError } from '@/components/feedback/EstadosPantalla';
 import { useToast } from '@/components/feedback/Toast';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EstadoMascotaBadge } from '@/components/ui/EstadoMascotaBadge';
@@ -197,24 +198,15 @@ export default function MisMascotasScreen() {
         </View>
 
         {cargando ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#FF9D5C" />
-          </View>
+          <EstadoCargando />
         ) : error ? (
-          <View className="flex-1 items-center justify-center px-6">
-            <Ionicons name="cloud-offline-outline" size={40} color="#9CA3AF" />
-            <Text className="mt-3 text-center text-base text-gray-600">{error}</Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {
-                setCargando(true);
-                void cargar();
-              }}
-              className="mt-4 rounded-full bg-pethood-orange px-6 py-2 active:opacity-90"
-            >
-              <Text className="font-medium text-white">Reintentar</Text>
-            </Pressable>
-          </View>
+          <EstadoError
+            mensaje={error}
+            onAccion={() => {
+              setCargando(true);
+              void cargar();
+            }}
+          />
         ) : (
           <FlatList
             data={mascotas}
