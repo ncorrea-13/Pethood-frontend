@@ -1,5 +1,12 @@
 import '../global.css';
 
+import { Caprasimo_400Regular } from '@expo-google-fonts/caprasimo';
+import {
+  Figtree_400Regular,
+  Figtree_600SemiBold,
+  Figtree_700Bold,
+} from '@expo-google-fonts/figtree';
+import { useFonts } from 'expo-font';
 import { NavigationBar } from 'expo-navigation-bar';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -40,9 +47,17 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { autenticado, cargando } = useSesion();
+  // Caprasimo para títulos y Figtree para el resto. Hasta que estén, no se dibuja nada:
+  // el sistema sustituiría por la fuente por defecto y la pantalla saltaría al cargar.
+  const [fuentesListas] = useFonts({
+    Caprasimo_400Regular,
+    Figtree_400Regular,
+    Figtree_600SemiBold,
+    Figtree_700Bold,
+  });
 
-  if (cargando) {
-    return <View className="flex-1 bg-pethood-beige" />;
+  if (cargando || !fuentesListas) {
+    return <View className="flex-1 bg-organic-bg" />;
   }
 
   return (
