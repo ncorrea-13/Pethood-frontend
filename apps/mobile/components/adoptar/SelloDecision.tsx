@@ -13,6 +13,8 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 
+import { PALETA } from '@/constants/theme';
+
 interface SelloDecisionProps {
   desplazamiento: SharedValue<number>;
   /** Distancia a partir de la cual el sello se ve entero. */
@@ -29,20 +31,34 @@ export function SelloDecision({ desplazamiento, umbral }: SelloDecisionProps) {
   }));
 
   return (
-    <View pointerEvents="none" className="absolute inset-0 justify-start p-5 pt-7">
-      <Animated.View style={estiloGuardar} className="absolute left-5 top-7">
-        <View className="flex-row items-center gap-1.5 rounded-xl border-[3px] border-pethood-orange bg-white/25 px-3 py-1.5">
-          <Ionicons name="heart" size={18} color="#FF9D5C" />
-          <Text className="text-base font-extrabold uppercase tracking-wide text-pethood-orange">
+    <View pointerEvents="none" className="absolute inset-0 justify-start p-5">
+      {/* `top-14` y no más arriba: por encima está el contador de fotos de la tarjeta, y
+          el sello de "Paso" se le montaba encima. */}
+      <Animated.View style={estiloGuardar} className="absolute left-5 top-14">
+        <View
+          className="flex-row items-center gap-1.5 rounded-2xl border-[3px] bg-white/85 px-3 py-1.5"
+          style={{ borderColor: PALETA.accent[600] }}
+        >
+          <Ionicons name="heart" size={18} color={PALETA.accent[600]} />
+          <Text
+            className="font-cuerpo-bold text-base uppercase tracking-wide"
+            style={{ color: PALETA.accent[600] }}
+          >
             Me gusta
           </Text>
         </View>
       </Animated.View>
 
-      <Animated.View style={estiloRechazar} className="absolute right-5 top-7">
-        <View className="flex-row items-center gap-1.5 rounded-xl border-[3px] border-gray-400 bg-white/25 px-3 py-1.5">
-          <Ionicons name="close" size={18} color="#9CA3AF" />
-          <Text className="text-base font-extrabold uppercase tracking-wide text-gray-400">
+      <Animated.View style={estiloRechazar} className="absolute right-5 top-14">
+        <View
+          className="flex-row items-center gap-1.5 rounded-2xl border-[3px] bg-white/85 px-3 py-1.5"
+          style={{ borderColor: PALETA.neutral[500] }}
+        >
+          <Ionicons name="close" size={18} color={PALETA.neutral[600]} />
+          <Text
+            className="font-cuerpo-bold text-base uppercase tracking-wide"
+            style={{ color: PALETA.neutral[600] }}
+          >
             Paso
           </Text>
         </View>
