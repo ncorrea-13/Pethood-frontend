@@ -21,7 +21,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/refugio/dashboard", request.url));
   }
 
-  if (esRutaRefugio && sesion && !tieneRol(sesion, "REFUGIO")) {
+  if (esRutaRefugio && sesion && !tieneRol(sesion, "MIEMBRO_REFUGIO")) {
     return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 
