@@ -1,0 +1,276 @@
+/**
+ * Ficha del animal — detalle completo de una publicación en adopción.
+ *
+ * Se abre tocando una tarjeta del mazo de Adoptar. La mascota NO se descarta de la pila al
+ * entrar acá: esa pantalla conserva su estado y el back devuelve a la misma tarjeta.
+ *
+ * El corazón guarda y quita de favoritos. Todavía no hay botón de solicitar adopción: ese
+ * flujo no tiene endpoint.
+ */
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { GaleriaFotos } from '@/components/adoptar/GaleriaFotos';
+import { EstadoCargando, EstadoError } from '@/components/feedback/EstadosPantalla';
+import { useToast } from '@/components/feedback/Toast';
+import { Chip } from '@/components/ui/Chip';
+import { EstadoMascotaBadge } from '@/components/ui/EstadoMascotaBadge';
+import { SeccionTitulada } from '@/components/ui/SeccionTitulada';
+import { resumenMascota } from '@/constants/Mascotas';
+import { agregarFavorito, quitarFavorito } from '@/services/favoritos';
+import { obtenerPublicacion, type PublicacionFeed } from '@/services/publicaciones';
+
+/** Ítem de una lista con viñeta, para requisitos y vacunas. */
+function Vinieta({ texto, icono }: { texto: string; icono: 'checkmark-circle' | 'ellipse' }) {
+  return (
+    <View className="mb-1.5 flex-row items-start gap-2">
+      <Ionicons
+        name={icono}
+        size={icono === 'ellipse' ? 7 : 16}
+        color="#FF9D5C"
+        style={{ marginTop: icono === 'ellipse' ? 7 : 1 }}
+      />
+      <Text className="flex-1 text-[15px] leading-6 text-gray-700">{texto}</Text>
+    </View>
+  );
+}
+
+/** Dato suelto en la grilla de características. */
+function Dato({ etiqueta, valor }: { etiqueta: string; valor: string }) {
+  return (
+    <View className="flex-1 rounded-2xl bg-white p-3">
+      <Text className="text-[11px] uppercase tracking-wide text-gray-400">{etiqueta}</Text>
+      <Text className="mt-0.5 text-[15px] font-semibold text-gray-800">{valor}</Text>
+    </View>
+  );
+}
+
+export default function FichaPublicacionScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const toast = useToast();
+  const insets = useSafeAreaInsets();
+
+  const [publicacion, setPublicacion] = useState<PublicacionFeed | null>(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [guardando, setGuardando] = useState(false);
+
+  const publicacionId = Number(id);
+
+  const cargar = useCallback(async (): Promise<void> => {
+    if (!Number.isInteger(publicacionId) || publicacionId <= 0) {
+      setError('La publicación no es válida.');
+      setCargando(false);
+      return;
+    }
+
+    try {
+      setError(null);
+      setPublicacion(await obtenerPublicacion(publicacionId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No pudimos cargar la publicación.');
+    } finally {
+      setCargando(false);
+    }
+  }, [publicacionId]);
+
+  useEffect(() => {
+    void cargar();
+  }, [cargar]);
+
+  /**
+   * Update optimista del corazón: cambia en el acto y se revierte si el servidor falla.
+   * Las dos operaciones de favoritos son idempotentes, así que un doble toque rápido no
+   * puede dejar el estado inconsistente.
+   */
+  const alternarFavorito = useCallback((): void => {
+    if (!publicacion || guardando) return;
+
+    const guardada = publicacion.enFavoritos;
+    const nombre = publicacion.mascota.nombre ?? 'la mascota';
+
+    setPublicacion({ ...publicacion, enFavoritos: !guardada });
+    setGuardando(true);
+
+    const operacion = guardada
+      ? quitarFavorito(publicacion.mascota.id)
+      : agregarFavorito(publicacion.mascota.id);
+
+    void operacion
+      .then(() => {
+        toast.mostrarExito(
+          guardada ? `Quitamos a ${nombre} de favoritos.` : `Guardamos a ${nombre} en favoritos.`,
+        );
+      })
+      .catch((err: unknown) => {
+        setPublicacion((actual) => (actual ? { ...actual, enFavoritos: guardada } : actual));
+        toast.mostrarError(
+          err instanceof Error ? err.message : 'No pudimos actualizar tus favoritos.',
+        );
+      })
+      .finally(() => setGuardando(false));
+  }, [guardando, publicacion, toast]);
+
+  const volver = useCallback((): void => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/(tabs)/adoptar');
+  }, [router]);
+
+  if (cargando) {
+    return (
+      <View className="flex-1 bg-pethood-beige">
+        <EstadoCargando />
+      </View>
+    );
+  }
+
+  if (error || !publicacion) {
+    return (
+      <View className="flex-1 bg-pethood-beige">
+        <SafeAreaView className="flex-1" edges={['top']}>
+          <EstadoError
+            mensaje={error ?? 'No encontramos la publicación.'}
+            onAccion={volver}
+            etiquetaAccion="Volver"
+          />
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  const { mascota } = publicacion;
+  const vacunas = publicacion.vacunas?.trim();
+
+  return (
+    <View className="flex-1 bg-pethood-beige">
+      {/* Se suma el inset inferior para que el último bloque no quede debajo de la barra
+          del sistema cuando esta se muestra. */}
+      <ScrollView contentContainerStyle={{ paddingBottom: 32 + insets.bottom }}>
+        <GaleriaFotos imagenes={publicacion.imagenes} />
+
+        {/* Los controles flotan sobre la galería, como en el diseño. El SafeAreaView los
+            baja lo justo para no quedar bajo la barra de estado. */}
+        <SafeAreaView className="absolute left-0 right-0 top-0" edges={['top']}>
+          <View className="flex-row items-center justify-between px-3 pt-2">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Volver"
+              onPress={volver}
+              hitSlop={10}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/90 active:opacity-70"
+            >
+              <Ionicons name="arrow-back" size={20} color="#3f3a31" />
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                publicacion.enFavoritos ? 'Quitar de favoritos' : 'Guardar en favoritos'
+              }
+              onPress={alternarFavorito}
+              hitSlop={10}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/90 active:opacity-70"
+            >
+              <Ionicons
+                name={publicacion.enFavoritos ? 'heart' : 'heart-outline'}
+                size={20}
+                color="#FF9D5C"
+              />
+            </Pressable>
+          </View>
+        </SafeAreaView>
+
+        <View className="px-4 pt-4">
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-gray-900">
+                {mascota.nombre ?? 'Sin nombre'}
+              </Text>
+              <Text className="mt-1 text-sm text-gray-500">{resumenMascota(mascota)}</Text>
+            </View>
+
+            <View className="mt-1">
+              <EstadoMascotaBadge estado={mascota.estado.nombre} />
+            </View>
+          </View>
+
+          {publicacion.refugio ? (
+            <View className="mt-3 flex-row items-center gap-1.5">
+              <Ionicons name="business-outline" size={14} color="#8a8170" />
+              <Text className="flex-1 text-[13px] text-gray-500">
+                {publicacion.refugio.nombre}
+                {publicacion.ubicacion ? ` · ${publicacion.ubicacion}` : ''}
+              </Text>
+            </View>
+          ) : publicacion.ubicacion ? (
+            <View className="mt-3 flex-row items-center gap-1.5">
+              <Ionicons name="location-outline" size={14} color="#8a8170" />
+              <Text className="flex-1 text-[13px] text-gray-500">{publicacion.ubicacion}</Text>
+            </View>
+          ) : null}
+
+          {publicacion.personalidad.length > 0 ? (
+            <View className="mt-3.5 flex-row flex-wrap gap-2">
+              {publicacion.personalidad.map((rasgo) => (
+                <Chip key={rasgo} etiqueta={rasgo} />
+              ))}
+            </View>
+          ) : null}
+
+          <SeccionTitulada className="mt-5" titulo="Características">
+            <View className="gap-2.5">
+              <View className="flex-row gap-2.5">
+                <Dato etiqueta="Especie" valor={mascota.especie.nombre} />
+                <Dato etiqueta="Raza" valor={mascota.raza.nombre} />
+              </View>
+              <View className="flex-row gap-2.5">
+                <Dato
+                  etiqueta="Peso"
+                  valor={mascota.peso === null ? 'Sin dato' : `${mascota.peso} kg`}
+                />
+                <Dato etiqueta="Castrado" valor={mascota.castrado ? 'Sí' : 'No'} />
+              </View>
+            </View>
+          </SeccionTitulada>
+
+          {publicacion.descripcion ? (
+            <SeccionTitulada className="mt-5" titulo={`Sobre ${mascota.nombre ?? 'la mascota'}`}>
+              <Text className="text-[15px] leading-6 text-gray-700">{publicacion.descripcion}</Text>
+            </SeccionTitulada>
+          ) : null}
+
+          <SeccionTitulada className="mt-5" titulo="Salud">
+            <View className="rounded-2xl bg-emerald-50 p-3.5">
+              {vacunas ? (
+                <Vinieta texto={`Vacunas: ${vacunas}`} icono="checkmark-circle" />
+              ) : (
+                <Vinieta texto="No se informaron vacunas" icono="ellipse" />
+              )}
+              <Vinieta
+                texto={publicacion.desparasitado ? 'Desparasitado' : 'Sin desparasitar'}
+                icono={publicacion.desparasitado ? 'checkmark-circle' : 'ellipse'}
+              />
+            </View>
+          </SeccionTitulada>
+
+          {publicacion.requisitos.length > 0 ? (
+            <SeccionTitulada className="mt-5" titulo="Requisitos para adoptar">
+              <View className="rounded-2xl bg-white p-3.5">
+                {publicacion.requisitos.map((requisito) => (
+                  <Vinieta key={requisito} texto={requisito} icono="ellipse" />
+                ))}
+              </View>
+            </SeccionTitulada>
+          ) : null}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}

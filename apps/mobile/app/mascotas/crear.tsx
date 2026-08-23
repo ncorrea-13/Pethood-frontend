@@ -11,7 +11,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { type Href, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -22,6 +21,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomButton } from '@/components/CustomButton';
+import { EstadoCargando } from '@/components/feedback/EstadosPantalla';
 import { useToast } from '@/components/feedback/Toast';
 import { ChipGroupField } from '@/components/ui/ChipGroupField';
 import { DateField } from '@/components/ui/DateField';
@@ -313,9 +313,7 @@ export default function CrearMascotaScreen() {
         </View>
 
         {cargandoCatalogos ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#FF9D5C" />
-          </View>
+          <EstadoCargando />
         ) : (
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}

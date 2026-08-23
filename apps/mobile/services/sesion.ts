@@ -1,13 +1,20 @@
 /**
- * Persistencia de la sesión. En nativo el token va en expo-secure-store
- * (keychain / keystore), nunca en AsyncStorage plano. En web (solo debug)
- * SecureStore no existe: caemos a localStorage.
+ * Persistencia de la sesión: token JWT y datos del usuario logueado.
+ *
+ * Es el ÚNICO lugar que lee o escribe la sesión. Antes convivía con `lib/session.ts`, que
+ * guardaba con otras claves: el cliente HTTP leía una y el login escribía la otra, así que
+ * ninguna petición autenticada llevaba el token y el backend respondía 401.
+ *
+ * En nativo el token va en expo-secure-store (keychain / keystore), nunca en AsyncStorage
+ * plano. En web (solo debug) SecureStore no existe: se cae a localStorage.
  */
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const CLAVE_TOKEN = 'pethood.token';
-const CLAVE_USUARIO = 'pethood.usuario';
+import type { Usuario } from '@/types/auth';
+
+const CLAVE_TOKEN = 'phd_token';
+const CLAVE_USUARIO = 'phd_usuario';
 const ES_WEB = Platform.OS === 'web';
 
 async function leer(clave: string): Promise<string | null> {
@@ -31,43 +38,38 @@ async function borrar(clave: string): Promise<void> {
   await SecureStore.deleteItemAsync(clave);
 }
 
-export interface UsuarioSesion {
-  id: number;
-  nombre: string;
-  apellido: string;
-  email: string;
-  verificado: boolean;
-  refugioId: number | null;
-  roles: string[];
-  imagenUrl?: string | null;
-  telefono?: string | null;
-  ubicacion?: string | null;
-}
-
-export function esRefugio(usuario: UsuarioSesion | null): boolean {
-  return (
-    usuario?.roles.includes('Refugio') || usuario?.roles.includes('MIEMBRO_REFUGIO') || false
-  );
+/** Quién pertenece a un refugio y, por lo tanto, puede administrarlo. */
+export function esMiembroDeRefugio(usuario: Usuario | null): boolean {
+  return Boolean(usuario?.roles.includes('MIEMBRO_REFUGIO'));
 }
 
 export async function obtenerToken(): Promise<string | null> {
   return leer(CLAVE_TOKEN);
 }
 
-export async function guardarSesion(token: string, usuario: UsuarioSesion): Promise<void> {
+export async function guardarToken(token: string): Promise<void> {
   await escribir(CLAVE_TOKEN, token);
+}
+
+export async function guardarUsuario(usuario: Usuario): Promise<void> {
   await escribir(CLAVE_USUARIO, JSON.stringify(usuario));
 }
 
-export async function obtenerUsuario(): Promise<UsuarioSesion | null> {
+export async function obtenerUsuario(): Promise<Usuario | null> {
   const guardado = await leer(CLAVE_USUARIO);
   if (!guardado) return null;
 
   try {
-    return JSON.parse(guardado) as UsuarioSesion;
+    return JSON.parse(guardado) as Usuario;
   } catch {
+    // Dato corrupto o de un formato viejo: se descarta y la app pide login de nuevo.
     return null;
   }
+}
+
+export async function guardarSesion(token: string, usuario: Usuario): Promise<void> {
+  await guardarToken(token);
+  await guardarUsuario(usuario);
 }
 
 export async function borrarSesion(): Promise<void> {

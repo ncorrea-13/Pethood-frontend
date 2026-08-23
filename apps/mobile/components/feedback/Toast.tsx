@@ -13,19 +13,34 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export type TipoToast = 'exito' | 'advertencia' | 'error';
 
+/**
+ * Acción opcional del toast, para deshacer algo que ya se aplicó (ej. quitar un favorito
+ * en GUI-12). Es la alternativa al modal de confirmación cuando la acción es de baja
+ * gravedad y alta frecuencia: no le cobra fricción al tap intencional y protege igual al
+ * accidental.
+ */
+export interface AccionToast {
+  etiqueta: string;
+  onPress: () => void;
+}
+
 interface Toast {
   id: number;
   tipo: TipoToast;
   mensaje: string;
+  accion?: AccionToast;
 }
 
 interface ContextoToast {
-  mostrarExito: (mensaje: string) => void;
-  mostrarAdvertencia: (mensaje: string) => void;
-  mostrarError: (mensaje: string) => void;
+  mostrarExito: (mensaje: string, accion?: AccionToast) => void;
+  mostrarAdvertencia: (mensaje: string, accion?: AccionToast) => void;
+  mostrarError: (mensaje: string, accion?: AccionToast) => void;
 }
 
 const DURACION_MS = 4000;
+
+/** Un toast con acción dura más: hay que notarlo y llegar a tocarlo antes de que se vaya. */
+const DURACION_CON_ACCION_MS = 7000;
 
 const ESTILOS: Record<TipoToast, { fondo: string; icono: keyof typeof Ionicons.glyphMap }> = {
   exito: { fondo: 'bg-emerald-600', icono: 'checkmark-circle' },
@@ -48,6 +63,7 @@ export function useToast(): ContextoToast {
 function ToastVisible({ toast, onCerrar }: { toast: Toast; onCerrar: () => void }) {
   const opacidad = useRef(new Animated.Value(0)).current;
   const estilo = ESTILOS[toast.tipo];
+  const { accion } = toast;
 
   useEffect(() => {
     Animated.timing(opacidad, {
@@ -67,6 +83,22 @@ function ToastVisible({ toast, onCerrar }: { toast: Toast; onCerrar: () => void 
       >
         <Ionicons name={estilo.icono} size={22} color="#FFFFFF" />
         <Text className="ml-3 flex-1 text-base font-medium text-white">{toast.mensaje}</Text>
+
+        {/* Pressable anidado: en RN el hijo captura el toque y no burbujea al padre, así
+            que tocar la acción no dispara el cierre por tap del toast entero. */}
+        {accion ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              accion.onPress();
+              onCerrar();
+            }}
+            hitSlop={8}
+            className="ml-3 rounded-full bg-white/25 px-3 py-1.5 active:opacity-70"
+          >
+            <Text className="text-sm font-bold text-white">{accion.etiqueta}</Text>
+          </Pressable>
+        ) : null}
       </Pressable>
     </Animated.View>
   );
@@ -81,20 +113,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const mostrar = useCallback(
-    (tipo: TipoToast, mensaje: string) => {
+    (tipo: TipoToast, mensaje: string, accion?: AccionToast) => {
       const id = siguienteId.current++;
 
-      setToasts((actuales) => [...actuales, { id, tipo, mensaje }]);
-      setTimeout(() => cerrar(id), DURACION_MS);
+      setToasts((actuales) => [...actuales, { id, tipo, mensaje, accion }]);
+      setTimeout(() => cerrar(id), accion ? DURACION_CON_ACCION_MS : DURACION_MS);
     },
     [cerrar],
   );
 
   const valor = useMemo<ContextoToast>(
     () => ({
-      mostrarExito: (mensaje) => mostrar('exito', mensaje),
-      mostrarAdvertencia: (mensaje) => mostrar('advertencia', mensaje),
-      mostrarError: (mensaje) => mostrar('error', mensaje),
+      mostrarExito: (mensaje, accion) => mostrar('exito', mensaje, accion),
+      mostrarAdvertencia: (mensaje, accion) => mostrar('advertencia', mensaje, accion),
+      mostrarError: (mensaje, accion) => mostrar('error', mensaje, accion),
     }),
     [mostrar],
   );

@@ -15,7 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -26,6 +25,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomButton } from '@/components/CustomButton';
+import { EstadoCargando, EstadoError } from '@/components/feedback/EstadosPantalla';
 import { useToast } from '@/components/feedback/Toast';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { DateField } from '@/components/ui/DateField';
@@ -326,21 +326,14 @@ export default function EditarMascotaScreen() {
         </View>
 
         {cargando ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#FF9D5C" />
-          </View>
+          <EstadoCargando />
         ) : errorCarga ? (
-          <View className="flex-1 items-center justify-center px-6">
-            <Ionicons name="alert-circle-outline" size={40} color="#9CA3AF" />
-            <Text className="mt-3 text-center text-base text-gray-600">{errorCarga}</Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.back()}
-              className="mt-4 rounded-full bg-pethood-orange px-6 py-2 active:opacity-90"
-            >
-              <Text className="font-medium text-white">Volver</Text>
-            </Pressable>
-          </View>
+          <EstadoError
+            mensaje={errorCarga}
+            icono="alert-circle-outline"
+            etiquetaAccion="Volver"
+            onAccion={() => router.back()}
+          />
         ) : (
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
