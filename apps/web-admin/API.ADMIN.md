@@ -181,7 +181,7 @@ Listado paginado de todos los usuarios del sistema. Soporta filtros y búsqueda.
 | `limit` | integer | 20 | Cantidad de resultados por pagina (max 50) |
 | `busqueda` | string | — | Busqueda parcial por nombre, apellido o email |
 | `rol` | string | — | Filtrar por rol: `ADOPTANTE`, `MIEMBRO_REFUGIO`, `ADMIN` |
-| `estado` | string | — | Filtrar por estado del usuario (nombre del catalogo, ej. `ACTIVO`, `PEND_VERIFICACION`, `SUSPENDIDO`) |
+| `estado` | string | — | Filtrar por estado del usuario (nombre del catalogo, ej. `Activo`, `Pendiente_Verificacion`, `Suspendido`) |
 | `verificado` | boolean | — | Filtrar por estado de verificacion |
 | `orden` | string | `fechaAlta` | Campo de ordenamiento: `fechaAlta`, `nombre`, `email` |
 | `direccion` | string | `desc` | `asc` o `desc` |
@@ -198,7 +198,7 @@ Listado paginado de todos los usuarios del sistema. Soporta filtros y búsqueda.
       "email": "juan@mail.com",
       "dni": "38123456",
       "verificado": true,
-      "estado": "ACTIVO",
+      "estado": "Activo",
       "roles": ["ADOPTANTE"],
       "refugio": null,
       "imagenUrl": "https://...",
@@ -240,7 +240,7 @@ Listado paginado de todos los usuarios del sistema. Soporta filtros y búsqueda.
 
 ## `PATCH /api/v1/admin/usuarios/:id/verificar`
 
-Marca un usuario como verificado (validacion de DNI y telefono por parte del admin). Solo aplica a usuarios en estado `PEND_VERIFICACION`.
+Marca un usuario como verificado (validacion de DNI y telefono por parte del admin). Solo aplica a usuarios en estado `Pendiente_Verificacion`.
 
 **Parametro de URL:**
 
@@ -256,7 +256,7 @@ Marca un usuario como verificado (validacion de DNI y telefono por parte del adm
   "usuario": {
     "id": 5,
     "verificado": true,
-    "estado": "ACTIVO"
+    "estado": "Activo"
   }
 }
 ```
@@ -273,7 +273,7 @@ Marca un usuario como verificado (validacion de DNI y telefono por parte del adm
 
 ## `PATCH /api/v1/admin/usuarios/:id/suspender`
 
-Suspende un usuario (cambia estado a `SUSPENDIDO`). Un usuario suspendido no puede iniciar sesion (403 en login).
+Suspende un usuario (cambia estado a `Suspendido`). Un usuario suspendido no puede iniciar sesion (403 en login).
 
 **Parametro de URL:**
 
@@ -300,7 +300,7 @@ Suspende un usuario (cambia estado a `SUSPENDIDO`). Un usuario suspendido no pue
   "mensaje": "Usuario suspendido correctamente",
   "usuario": {
     "id": 5,
-    "estado": "SUSPENDIDO"
+    "estado": "Suspendido"
   }
 }
 ```
@@ -315,7 +315,185 @@ Suspende un usuario (cambia estado a `SUSPENDIDO`). Un usuario suspendido no pue
 
 ---
 
+## `PATCH /api/v1/admin/usuarios/:id/reactivar`
+
+Reactiva un usuario suspendido (`Suspendido` → `Activo`). Vuelve a poder iniciar sesion.
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del usuario a reactivar |
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Usuario reactivado correctamente",
+  "usuario": {
+    "id": 5,
+    "estado": "Activo"
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
+| `ESTADO_INVALIDO` | El usuario no esta suspendido | 400 |
+
+---
+
+## `PATCH /api/v1/admin/usuarios/:id/baja`
+
+Baja logica de un usuario: setea fecha de baja y estado `Inactivo`. No tiene reversion por API. No aplica a administradores.
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del usuario a dar de baja |
+
+**Body:**
+
+```json
+{
+  "motivo": "Cuenta duplicada"
+}
+```
+
+| Campo | Tipo | Requerido | Descripcion |
+|---|---|---|---|
+| `motivo` | string | si | Motivo de la baja (1-500 caracteres, se registra en auditoria) |
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Usuario dado de baja correctamente",
+  "usuario": {
+    "id": 5,
+    "estado": "Inactivo"
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
+| `NO_SE_PUEDE_BAJAR_ADMIN` | No se puede dar de baja a un administrador | 403 |
+| `USUARIO_YA_DADO_DE_BAJA` | El usuario ya fue dado de baja | 409 |
+| `VALIDACION` | Motivo vacio o fuera de rango | 400 |
+
+---
+
+## `PATCH /api/v1/admin/usuarios/:id/roles`
+
+Agrega y/o quita roles de un usuario en una sola llamada (HU-2.1).
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del usuario |
+
+**Body:**
+
+```json
+{
+  "agregar": ["MIEMBRO_REFUGIO"],
+  "quitar": [],
+  "refugioId": 2
+}
+```
+
+| Campo | Tipo | Requerido | Descripcion |
+|---|---|---|---|
+| `agregar` | string[] | no | Codigos de rol a agregar: `ADMIN`, `ADOPTANTE`, `MIEMBRO_REFUGIO` |
+| `quitar` | string[] | no | Codigos de rol a quitar |
+| `refugioId` | integer | condicional | Obligatorio al agregar `MIEMBRO_REFUGIO` (el refugio al que pertenece) |
+
+**Reglas:**
+
+- Un mismo rol no puede estar en `agregar` y `quitar` a la vez.
+- No se puede modificar roles de un usuario con rol `ADMIN` (ni auto-modificarse).
+- Quitar `ADMIN` a otro admin solo si queda al menos otro administrador activo, si no `ULTIMO_ADMINISTRADOR`.
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Roles actualizados correctamente",
+  "roles": ["ADOPTANTE", "MIEMBRO_REFUGIO"]
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
+| `ROL_INVALIDO` | Un codigo de rol no es valido | 400 |
+| `VALIDACION` | Mismo rol en agregar y quitar, o MIEMBRO_REFUGIO sin refugioId | 400 |
+| `NO_SE_PUEDE_EDITAR_ADMIN` | No se pueden modificar los roles de un administrador | 403 |
+| `REFUGIO_NO_ENCONTRADO` | El refugioId indicado no existe | 404 |
+| `ULTIMO_ADMINISTRADOR` | No se puede quitar el ultimo administrador | 409 |
+
+---
+
 # Gestión de Refugios
+
+> Estados posibles: `Pendiente_Verificacion`, `Activo`, `Suspendido`, `Inactivo` (baja logica). El valor `Suspendido` se incorpora al catalogo por el seed del modulo (spec backend 002).
+
+## `POST /api/v1/admin/refugios`
+
+Da de alta un refugio desde el panel (HU-2.4). Nace en estado `Pendiente_Verificacion` con `verificado=false`; queda habilitado cuando el admin lo verifica.
+
+**Body:**
+
+```json
+{
+  "nombre": "Refugio Patitas",
+  "direccion": "Av. San Martin 1234",
+  "telefono": "+54 261 555-1234",
+  "email": "patitas@refugio.com",
+  "descripcion": "Refugio independiente fundado en 2020"
+}
+```
+
+| Campo | Tipo | Requerido | Descripcion |
+|---|---|---|---|
+| `nombre` | string | si | Nombre del refugio |
+| `direccion` | string | si | Direccion fiscal |
+| `telefono` | string | no | Telefono de contacto |
+| `email` | string | no | Email de contacto |
+| `descripcion` | string | no | Descripcion |
+
+**Respuesta:** `201 Created`
+
+```json
+{
+  "mensaje": "Refugio creado correctamente",
+  "refugio": {
+    "id": 3,
+    "nombre": "Refugio Patitas",
+    "estado": "Pendiente_Verificacion",
+    "verificado": false
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `VALIDACION` | Campos fuera de rango o vacios | 400 |
+
+---
 
 ## `GET /api/v1/admin/refugios`
 
@@ -329,7 +507,7 @@ Listado paginado de todos los refugios del sistema. Soporta filtros y busqueda.
 | `limit` | integer | 20 | Cantidad de resultados por pagina (max 50) |
 | `busqueda` | string | — | Busqueda parcial por nombre o email del refugio |
 | `verificado` | boolean | — | Filtrar por estado de verificacion |
-| `estado` | string | — | Filtrar por estado del refugio (nombre del catalogo, ej. `PEND_VERIFICACION`, `ACTIVO`, `SUSPENDIDO`) |
+| `estado` | string | — | Filtrar por estado del refugio (nombre del catalogo, ej. `Pendiente_Verificacion`, `Activo`, `Suspendido`) |
 | `orden` | string | `fechaAlta` | Campo de ordenamiento: `fechaAlta`, `nombre` |
 | `direccion` | string | `desc` | `asc` o `desc` |
 
@@ -345,7 +523,7 @@ Listado paginado de todos los refugios del sistema. Soporta filtros y busqueda.
       "telefono": "+54 261 555-1234",
       "email": "patitas@refugio.com",
       "verificado": false,
-      "estado": "PEND_VERIFICACION",
+      "estado": "Pendiente_Verificacion",
       "imagenUrl": "https://...",
       "miembros": 5,
       "mascotas": 12,
@@ -403,7 +581,7 @@ Detalle completo de un refugio, incluyendo miembros y resumen de actividad. Util
     "email": "patitas@refugio.com",
     "descripcion": "Refugio independiente fundado en 2020...",
     "verificado": false,
-    "estado": "PEND_VERIFICACION",
+    "estado": "Pendiente_Verificacion",
     "imagenUrl": "https://...",
     "fechaAlta": "2026-08-01T10:00:00.000Z"
   },
@@ -437,7 +615,7 @@ Detalle completo de un refugio, incluyendo miembros y resumen de actividad. Util
 
 ## `PATCH /api/v1/admin/refugios/:id/verificar`
 
-Verifica un refugio, habilitandolo a operar plenamente. Solo aplica a refugios en estado `PEND_VERIFICACION`.
+Verifica un refugio, habilitandolo a operar plenamente. Solo aplica a refugios en estado `Pendiente_Verificacion`.
 
 **Parametro de URL:**
 
@@ -453,7 +631,7 @@ Verifica un refugio, habilitandolo a operar plenamente. Solo aplica a refugios e
   "refugio": {
     "id": 2,
     "verificado": true,
-    "estado": "ACTIVO"
+    "estado": "Activo"
   }
 }
 ```
@@ -470,7 +648,7 @@ Verifica un refugio, habilitandolo a operar plenamente. Solo aplica a refugios e
 
 ## `PATCH /api/v1/admin/refugios/:id/suspender`
 
-Suspende un refugio (cambia estado a `SUSPENDIDO`). Un refugio suspendido no puede publicar mascotas ni campanias.
+Suspende un refugio (cambia estado a `Suspendido`). Un refugio suspendido no puede publicar mascotas ni campanias.
 
 **Parametro de URL:**
 
@@ -497,7 +675,7 @@ Suspende un refugio (cambia estado a `SUSPENDIDO`). Un refugio suspendido no pue
   "mensaje": "Refugio suspendido correctamente",
   "refugio": {
     "id": 2,
-    "estado": "SUSPENDIDO"
+    "estado": "Suspendido"
   }
 }
 ```
@@ -508,6 +686,81 @@ Suspende un refugio (cambia estado a `SUSPENDIDO`). Un refugio suspendido no pue
 |---|---|---|
 | `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
 | `REFUGIO_YA_SUSPENDIDO` | El refugio ya esta suspendido | 409 |
+
+---
+
+## `PATCH /api/v1/admin/refugios/:id/reactivar`
+
+Reactiva un refugio suspendido (`Suspendido` → `Activo`).
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del refugio a reactivar |
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Refugio reactivado correctamente",
+  "refugio": {
+    "id": 2,
+    "estado": "Activo"
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
+| `ESTADO_INVALIDO` | El refugio no esta suspendido | 400 |
+
+---
+
+## `PATCH /api/v1/admin/refugios/:id/baja`
+
+Baja logica de un refugio (HU-2.4): setea fecha de baja y estado `Inactivo`. No tiene reversion por API.
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del refugio a dar de baja |
+
+**Body:**
+
+```json
+{
+  "motivo": "Refugio cerrado definitivamente"
+}
+```
+
+| Campo | Tipo | Requerido | Descripcion |
+|---|---|---|---|
+| `motivo` | string | si | Motivo de la baja (1-500 caracteres, se registra en auditoria) |
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Refugio dado de baja correctamente",
+  "refugio": {
+    "id": 2,
+    "estado": "Inactivo"
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
+| `REFUGIO_YA_DADO_DE_BAJA` | El refugio ya fue dado de baja | 409 |
+| `VALIDACION` | Motivo vacio o fuera de rango | 400 |
 
 ---
 
@@ -762,14 +1015,16 @@ Retorna todos los catalogos de estado en una sola llamada.
     { "id": 5, "nombre": "En_Transito" }
   ],
   "estadosUsuario": [
-    { "id": 1, "nombre": "PEND_VERIFICACION" },
-    { "id": 2, "nombre": "ACTIVO" },
-    { "id": 3, "nombre": "SUSPENDIDO" }
+    { "id": 1, "nombre": "Pendiente_Verificacion" },
+    { "id": 2, "nombre": "Activo" },
+    { "id": 3, "nombre": "Suspendido" },
+    { "id": 4, "nombre": "Inactivo" }
   ],
   "estadosRefugio": [
-    { "id": 1, "nombre": "PEND_VERIFICACION" },
-    { "id": 2, "nombre": "ACTIVO" },
-    { "id": 3, "nombre": "SUSPENDIDO" }
+    { "id": 1, "nombre": "Pendiente_Verificacion" },
+    { "id": 2, "nombre": "Activo" },
+    { "id": 3, "nombre": "Suspendido" },
+    { "id": 4, "nombre": "Inactivo" }
   ],
   "estadosSolicitud": [
     { "id": 1, "nombre": "Pendiente" },
