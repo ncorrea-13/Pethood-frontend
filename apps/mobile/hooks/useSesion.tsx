@@ -2,19 +2,19 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import * as authService from '@/services/auth';
 import {
   borrarSesion,
+  esMiembroDeRefugio,
   guardarSesion,
   guardarUsuario,
   obtenerToken,
   obtenerUsuario,
-} from '@/lib/session';
-import * as authService from '@/services/auth';
-import { esRefugio as usuarioEsRefugio, type UsuarioSesion } from '@/services/sesion';
+} from '@/services/sesion';
 import type { Usuario } from '@/types/auth';
 
 interface ContextoSesion {
-  usuario: UsuarioSesion | null;
+  usuario: Usuario | null;
   /** JWT de login con email/contraseña o de OAuth 2.0 (Google). */
   token: string | null;
   autenticado: boolean;
@@ -39,23 +39,8 @@ export function useSesion(): ContextoSesion {
   return contexto;
 }
 
-function aUsuarioSesion(usuario: Usuario): UsuarioSesion {
-  return {
-    id: usuario.id,
-    nombre: usuario.nombre,
-    apellido: usuario.apellido,
-    email: usuario.email,
-    verificado: false,
-    refugioId: null,
-    roles: usuario.roles,
-    imagenUrl: usuario.imagenUrl,
-    telefono: usuario.telefono,
-    ubicacion: usuario.ubicacion,
-  };
-}
-
 export function SesionProvider({ children }: { children: ReactNode }) {
-  const [usuario, setUsuario] = useState<UsuarioSesion | null>(null);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
 
@@ -63,19 +48,19 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     void Promise.all([obtenerToken(), obtenerUsuario()])
       .then(([tokenGuardado, usuarioGuardado]) => {
         setToken(tokenGuardado);
-        setUsuario(usuarioGuardado ? aUsuarioSesion(usuarioGuardado) : null);
+        setUsuario(usuarioGuardado);
       })
       .finally(() => setCargando(false));
   }, []);
 
   const establecerSesion = useCallback(async (nuevoToken: string, nuevoUsuario: Usuario) => {
     setToken(nuevoToken);
-    setUsuario(aUsuarioSesion(nuevoUsuario));
+    setUsuario(nuevoUsuario);
     await guardarSesion(nuevoToken, nuevoUsuario);
   }, []);
 
   const actualizarUsuario = useCallback(async (nuevoUsuario: Usuario) => {
-    setUsuario(aUsuarioSesion(nuevoUsuario));
+    setUsuario(nuevoUsuario);
     await guardarUsuario(nuevoUsuario);
   }, []);
 
@@ -103,7 +88,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       token,
       autenticado: Boolean(token),
       cargando,
-      esRefugio: usuarioEsRefugio(usuario),
+      esRefugio: esMiembroDeRefugio(usuario),
       establecerSesion,
       actualizarUsuario,
       iniciarSesion,
