@@ -32,7 +32,7 @@ export default async function DashboardAdminPage() {
     <div className="animate-dashboard-in space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-neutral-900">Dashboard</h1>
-        <p className="text-sm text-neutral-500">Resumen general de la plataforma.</p>
+        <p className="text-sm text-neutral-700">Resumen general de la plataforma.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

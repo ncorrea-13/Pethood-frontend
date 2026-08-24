@@ -39,7 +39,7 @@ export function ExportacionAdmin({ token }: { token: string }) {
     <div className="space-y-4">
       <div className="rounded-lg border border-neutral-200 bg-white p-6">
         <h1 className="text-lg font-semibold text-neutral-900">Exportar datos</h1>
-        <p className="mt-1 text-sm text-neutral-500">Descarga un CSV por entidad, sin dados de baja.</p>
+        <p className="mt-1 text-sm text-neutral-700">Descarga un CSV por entidad, sin dados de baja.</p>
 
         <div className="mt-4 flex flex-wrap gap-3">
           {ENTIDADES_EXPORTABLES.map((entidad) => (
