@@ -179,17 +179,20 @@ Listado paginado de todos los usuarios del sistema. Soporta filtros y búsqueda.
 |---|---|---|---|
 | `page` | integer | 1 | Pagina a retornar (1-indexed) |
 | `limit` | integer | 20 | Cantidad de resultados por pagina (max 50) |
-| `busqueda` | string | — | Busqueda parcial por nombre, apellido o email |
+| `q` | string | — | Busqueda parcial por nombre, apellido o email |
 | `rol` | string | — | Filtrar por rol: `ADOPTANTE`, `MIEMBRO_REFUGIO`, `ADMIN` |
 | `estado` | string | — | Filtrar por estado del usuario (nombre del catalogo, ej. `Activo`, `Pendiente_Verificacion`, `Suspendido`) |
-| `verificado` | boolean | — | Filtrar por estado de verificacion |
-| `orden` | string | `fechaAlta` | Campo de ordenamiento: `fechaAlta`, `nombre`, `email` |
-| `direccion` | string | `desc` | `asc` o `desc` |
+| `verificado` | `'true'` \| `'false'` | — | Filtrar por estado de verificacion |
+
+> No hay ordenamiento server-side (`orden`/`direccion`) por ahora: el listado siempre va por `id` ascendente.
 
 **Respuesta:**
 
 ```json
 {
+  "total": 150,
+  "page": 1,
+  "limit": 20,
   "usuarios": [
     {
       "id": 5,
@@ -197,20 +200,13 @@ Listado paginado de todos los usuarios del sistema. Soporta filtros y búsqueda.
       "apellido": "Perez",
       "email": "juan@mail.com",
       "dni": "38123456",
+      "telefono": "+54 261 555-1234",
       "verificado": true,
       "estado": "Activo",
       "roles": ["ADOPTANTE"],
-      "refugio": null,
-      "imagenUrl": "https://...",
-      "fechaAlta": "2026-07-15T10:00:00.000Z"
+      "refugioId": null
     }
-  ],
-  "paginacion": {
-    "pagina": 1,
-    "limite": 20,
-    "total": 150,
-    "totalPaginas": 8
-  }
+  ]
 }
 ```
 
@@ -223,18 +219,17 @@ Listado paginado de todos los usuarios del sistema. Soporta filtros y búsqueda.
 | `apellido` | string | Apellido |
 | `email` | string | Email (unico) |
 | `dni` | string \| null | DNI (nullable para cuentas Google) |
+| `telefono` | string \| null | Telefono (nullable para cuentas Google) |
 | `verificado` | boolean | true si el admin verifico DNI/telefono |
 | `estado` | string | Estado actual del usuario |
 | `roles` | string[] | Roles asignados |
-| `refugio` | object \| null | Refugio asociado si es MIEMBRO_REFUGIO |
-| `imagenUrl` | string \| null | URL de foto de perfil |
-| `fechaAlta` | string (ISO 8601) | Fecha de creacion |
+| `refugioId` | number \| null | ID del refugio asociado si es MIEMBRO_REFUGIO |
 
 **Errores:**
 
 | Codigo | Mensaje | HTTP |
 |---|---|---|
-| `PARAMETROS_INVALIDOS` | Los parametros de consulta son invalidos | 400 |
+| `VALIDACION` | Los parametros de consulta no son validos | 400 |
 
 ---
 
@@ -267,7 +262,8 @@ Marca un usuario como verificado (validacion de DNI y telefono por parte del adm
 |---|---|---|
 | `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
 | `USUARIO_YA_VERIFICADO` | El usuario ya esta verificado | 409 |
-| `ESTADO_INVALIDO` | El usuario no esta en un estado que permita verificacion | 400 |
+| `ESTADO_INVALIDO` | El usuario no esta en Pendiente_Verificacion | 409 |
+| `DATOS_INCOMPLETOS` | Falta el DNI y/o el telefono del usuario | 409 |
 
 ---
 
@@ -312,6 +308,7 @@ Suspende un usuario (cambia estado a `Suspendido`). Un usuario suspendido no pue
 | `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
 | `NO_SE_PUEDE_SUSPENDER_ADMIN` | No se puede suspender a un administrador | 403 |
 | `USUARIO_YA_SUSPENDIDO` | El usuario ya esta suspendido | 409 |
+| `ESTADO_INVALIDO` | Solo se puede suspender a un usuario Activo | 409 |
 
 ---
 
@@ -342,7 +339,7 @@ Reactiva un usuario suspendido (`Suspendido` → `Activo`). Vuelve a poder inici
 | Codigo | Mensaje | HTTP |
 |---|---|---|
 | `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
-| `ESTADO_INVALIDO` | El usuario no esta suspendido | 400 |
+| `ESTADO_INVALIDO` | El usuario no esta suspendido | 409 |
 
 ---
 
@@ -437,8 +434,7 @@ Agrega y/o quita roles de un usuario en una sola llamada (HU-2.1).
 | Codigo | Mensaje | HTTP |
 |---|---|---|
 | `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
-| `ROL_INVALIDO` | Un codigo de rol no es valido | 400 |
-| `VALIDACION` | Mismo rol en agregar y quitar, o MIEMBRO_REFUGIO sin refugioId | 400 |
+| `VALIDACION` | Rol invalido, mismo rol en agregar y quitar, o MIEMBRO_REFUGIO sin refugioId | 400 |
 | `NO_SE_PUEDE_EDITAR_ADMIN` | No se pueden modificar los roles de un administrador | 403 |
 | `REFUGIO_NO_ENCONTRADO` | El refugioId indicado no existe | 404 |
 | `ULTIMO_ADMINISTRADOR` | No se puede quitar el ultimo administrador | 409 |
@@ -505,16 +501,19 @@ Listado paginado de todos los refugios del sistema. Soporta filtros y busqueda.
 |---|---|---|---|
 | `page` | integer | 1 | Pagina a retornar (1-indexed) |
 | `limit` | integer | 20 | Cantidad de resultados por pagina (max 50) |
-| `busqueda` | string | — | Busqueda parcial por nombre o email del refugio |
-| `verificado` | boolean | — | Filtrar por estado de verificacion |
+| `q` | string | — | Busqueda parcial por nombre del refugio |
+| `verificado` | `'true'` \| `'false'` | — | Filtrar por estado de verificacion |
 | `estado` | string | — | Filtrar por estado del refugio (nombre del catalogo, ej. `Pendiente_Verificacion`, `Activo`, `Suspendido`) |
-| `orden` | string | `fechaAlta` | Campo de ordenamiento: `fechaAlta`, `nombre` |
-| `direccion` | string | `desc` | `asc` o `desc` |
+
+> No hay ordenamiento server-side (`orden`/`direccion`) por ahora: el listado siempre va por `id` ascendente.
 
 **Respuesta:**
 
 ```json
 {
+  "total": 12,
+  "page": 1,
+  "limit": 20,
   "refugios": [
     {
       "id": 2,
@@ -522,21 +521,12 @@ Listado paginado de todos los refugios del sistema. Soporta filtros y busqueda.
       "direccion": "Av. San Martin 1234",
       "telefono": "+54 261 555-1234",
       "email": "patitas@refugio.com",
+      "descripcion": "Refugio independiente fundado en 2020",
       "verificado": false,
       "estado": "Pendiente_Verificacion",
-      "imagenUrl": "https://...",
-      "miembros": 5,
-      "mascotas": 12,
-      "campanias": 2,
-      "fechaAlta": "2026-08-01T10:00:00.000Z"
+      "imagenUrl": null
     }
-  ],
-  "paginacion": {
-    "pagina": 1,
-    "limite": 20,
-    "total": 12,
-    "totalPaginas": 1
-  }
+  ]
 }
 ```
 
@@ -549,13 +539,12 @@ Listado paginado de todos los refugios del sistema. Soporta filtros y busqueda.
 | `direccion` | string | Direccion fiscal o physical |
 | `telefono` | string \| null | Telefono de contacto |
 | `email` | string \| null | Email de contacto |
+| `descripcion` | string \| null | Descripcion |
 | `verificado` | boolean | true si el admin verifico el refugio |
 | `estado` | string | Estado actual del refugio |
 | `imagenUrl` | string \| null | URL de logo/imagen |
-| `miembros` | number | Cantidad de usuarios asociados al refugio |
-| `mascotas` | number | Cantidad de mascotas activas del refugio |
-| `campanias` | number | Cantidad de campanias activas del refugio |
-| `fechaAlta` | string (ISO 8601) | Fecha de creacion |
+
+> **Decision de equipo:** los conteos (`miembros`/`mascotas`/`campanias`) y `fechaAlta` quedan afuera del listado a proposito — traerlos por fila implicaria 3 queries de agregacion extra por cada resultado de la pagina. Esos numeros ya estan disponibles en el detalle (`GET /admin/refugios/:id`, campo `resumen`), donde el costo se paga una sola vez.
 
 ---
 
@@ -582,8 +571,7 @@ Detalle completo de un refugio, incluyendo miembros y resumen de actividad. Util
     "descripcion": "Refugio independiente fundado en 2020...",
     "verificado": false,
     "estado": "Pendiente_Verificacion",
-    "imagenUrl": "https://...",
-    "fechaAlta": "2026-08-01T10:00:00.000Z"
+    "imagenUrl": "https://..."
   },
   "miembros": [
     {
@@ -642,7 +630,7 @@ Verifica un refugio, habilitandolo a operar plenamente. Solo aplica a refugios e
 |---|---|---|
 | `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
 | `REFUGIO_YA_VERIFICADO` | El refugio ya esta verificado | 409 |
-| `ESTADO_INVALIDO` | El refugio no esta en un estado que permita verificacion | 400 |
+| `ESTADO_INVALIDO` | El refugio no esta en Pendiente_Verificacion | 409 |
 
 ---
 
@@ -686,6 +674,7 @@ Suspende un refugio (cambia estado a `Suspendido`). Un refugio suspendido no pue
 |---|---|---|
 | `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
 | `REFUGIO_YA_SUSPENDIDO` | El refugio ya esta suspendido | 409 |
+| `ESTADO_INVALIDO` | Solo se puede suspender a un refugio Activo | 409 |
 
 ---
 
@@ -716,7 +705,7 @@ Reactiva un refugio suspendido (`Suspendido` → `Activo`).
 | Codigo | Mensaje | HTTP |
 |---|---|---|
 | `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
-| `ESTADO_INVALIDO` | El refugio no esta suspendido | 400 |
+| `ESTADO_INVALIDO` | El refugio no esta suspendido | 409 |
 
 ---
 
