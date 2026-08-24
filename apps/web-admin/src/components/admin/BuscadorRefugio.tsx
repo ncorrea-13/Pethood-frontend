@@ -44,7 +44,6 @@ export function BuscadorRefugio({
 
   useEffect(() => {
     if (!abierto) return;
-    setCargando(true);
     const timeout = setTimeout(() => {
       listarRefugios({ q: query || undefined, limit: 10 }, token)
         .then((lista) => setResultados(lista.refugios))
@@ -61,10 +60,14 @@ export function BuscadorRefugio({
         <input
           type="text"
           value={query}
-          onFocus={() => setAbierto(true)}
+          onFocus={() => {
+            setAbierto(true);
+            setCargando(true);
+          }}
           onChange={(e) => {
             setQuery(e.target.value);
             setAbierto(true);
+            setCargando(true);
             if (refugioId) onSeleccionar(null);
           }}
           placeholder={refugioId ? `Refugio #${refugioId} seleccionado` : "Buscar refugio por nombre…"}

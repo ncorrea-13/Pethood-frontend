@@ -20,16 +20,28 @@ export function DetalleRefugioModal({
   const [detalle, setDetalle] = useState<DetalleRefugio | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [refugioIdCargado, setRefugioIdCargado] = useState(refugioId);
+
+  if (refugioId !== refugioIdCargado) {
+    setRefugioIdCargado(refugioId);
+    setCargando(true);
+    setDetalle(null);
+    setError(null);
+  }
 
   useEffect(() => {
     let cancelado = false;
-    setCargando(true);
     obtenerRefugio(refugioId, token)
       .then((data) => {
         if (!cancelado) setDetalle(data);
       })
       .catch((err) => {
-        if (!cancelado) setError(err instanceof ApiError ? err.message : "No pudimos cargar el refugio.");
+        if (!cancelado)
+          setError(
+            err instanceof ApiError
+              ? err.message
+              : "No pudimos cargar el refugio.",
+          );
       })
       .finally(() => {
         if (!cancelado) setCargando(false);
@@ -40,7 +52,10 @@ export function DetalleRefugioModal({
   }, [refugioId, token]);
 
   return (
-    <Modal titulo={detalle?.refugio.nombre ?? "Detalle del refugio"} onCerrar={onCerrar}>
+    <Modal
+      titulo={detalle?.refugio.nombre ?? "Detalle del refugio"}
+      onCerrar={onCerrar}
+    >
       {cargando && <p className="text-sm text-neutral-500">Cargando…</p>}
       {error && <Feedback tipo="error" mensaje={error} />}
 
@@ -50,24 +65,50 @@ export function DetalleRefugioModal({
             <p>{detalle.refugio.direccion}</p>
             {detalle.refugio.telefono && <p>{detalle.refugio.telefono}</p>}
             {detalle.refugio.email && <p>{detalle.refugio.email}</p>}
-            {detalle.refugio.descripcion && <p className="text-neutral-500">{detalle.refugio.descripcion}</p>}
+            {detalle.refugio.descripcion && (
+              <p className="text-neutral-500">{detalle.refugio.descripcion}</p>
+            )}
           </div>
 
           <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Resumen</h3>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Resumen
+            </h3>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              <ResumenItem etiqueta="Mascotas activas" valor={detalle.resumen.mascotasActivas} />
-              <ResumenItem etiqueta="Publicaciones activas" valor={detalle.resumen.publicacionesActivas} />
-              <ResumenItem etiqueta="Solicitudes pendientes" valor={detalle.resumen.solicitudesPendientes} />
-              <ResumenItem etiqueta="Campañas activas" valor={detalle.resumen.campaniasActivas} />
-              <ResumenItem etiqueta="Reseñas recibidas" valor={detalle.resumen.resenasRecibidas} />
-              <ResumenItem etiqueta="Promedio reseñas" valor={detalle.resumen.promedioResenas} />
+              <ResumenItem
+                etiqueta="Mascotas activas"
+                valor={detalle.resumen.mascotasActivas}
+              />
+              <ResumenItem
+                etiqueta="Publicaciones activas"
+                valor={detalle.resumen.publicacionesActivas}
+              />
+              <ResumenItem
+                etiqueta="Solicitudes pendientes"
+                valor={detalle.resumen.solicitudesPendientes}
+              />
+              <ResumenItem
+                etiqueta="Campañas activas"
+                valor={detalle.resumen.campaniasActivas}
+              />
+              <ResumenItem
+                etiqueta="Reseñas recibidas"
+                valor={detalle.resumen.resenasRecibidas}
+              />
+              <ResumenItem
+                etiqueta="Promedio reseñas"
+                valor={detalle.resumen.promedioResenas}
+              />
             </div>
           </div>
 
           <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Miembros</h3>
-            {detalle.miembros.length === 0 && <p className="text-neutral-500">Sin miembros asignados.</p>}
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Miembros
+            </h3>
+            {detalle.miembros.length === 0 && (
+              <p className="text-neutral-500">Sin miembros asignados.</p>
+            )}
             <ul className="space-y-1">
               {detalle.miembros.map((miembro) => (
                 <li key={miembro.id} className="text-neutral-700">
