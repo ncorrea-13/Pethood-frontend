@@ -441,6 +441,136 @@ Agrega y/o quita roles de un usuario en una sola llamada (HU-2.1).
 
 ---
 
+## `PATCH /api/v1/admin/usuarios/:id/reactivar`
+
+Reactiva un usuario suspendido (`Suspendido` → `Activo`). Vuelve a poder iniciar sesion.
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del usuario a reactivar |
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Usuario reactivado correctamente",
+  "usuario": {
+    "id": 5,
+    "estado": "Activo"
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
+| `ESTADO_INVALIDO` | El usuario no esta suspendido | 400 |
+
+---
+
+## `PATCH /api/v1/admin/usuarios/:id/baja`
+
+Baja logica de un usuario: setea fecha de baja y estado `Inactivo`. No tiene reversion por API. No aplica a administradores.
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del usuario a dar de baja |
+
+**Body:**
+
+```json
+{
+  "motivo": "Cuenta duplicada"
+}
+```
+
+| Campo | Tipo | Requerido | Descripcion |
+|---|---|---|---|
+| `motivo` | string | si | Motivo de la baja (1-500 caracteres, se registra en auditoria) |
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Usuario dado de baja correctamente",
+  "usuario": {
+    "id": 5,
+    "estado": "Inactivo"
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
+| `NO_SE_PUEDE_BAJAR_ADMIN` | No se puede dar de baja a un administrador | 403 |
+| `USUARIO_YA_DADO_DE_BAJA` | El usuario ya fue dado de baja | 409 |
+| `VALIDACION` | Motivo vacio o fuera de rango | 400 |
+
+---
+
+## `PATCH /api/v1/admin/usuarios/:id/roles`
+
+Agrega y/o quita roles de un usuario en una sola llamada (HU-2.1).
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del usuario |
+
+**Body:**
+
+```json
+{
+  "agregar": ["MIEMBRO_REFUGIO"],
+  "quitar": [],
+  "refugioId": 2
+}
+```
+
+| Campo | Tipo | Requerido | Descripcion |
+|---|---|---|---|
+| `agregar` | string[] | no | Codigos de rol a agregar: `ADMIN`, `ADOPTANTE`, `MIEMBRO_REFUGIO` |
+| `quitar` | string[] | no | Codigos de rol a quitar |
+| `refugioId` | integer | condicional | Obligatorio al agregar `MIEMBRO_REFUGIO` (el refugio al que pertenece) |
+
+**Reglas:**
+
+- Un mismo rol no puede estar en `agregar` y `quitar` a la vez.
+- No se puede modificar roles de un usuario con rol `ADMIN` (ni auto-modificarse).
+- Quitar `ADMIN` a otro admin solo si queda al menos otro administrador activo, si no `ULTIMO_ADMINISTRADOR`.
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Roles actualizados correctamente",
+  "roles": ["ADOPTANTE", "MIEMBRO_REFUGIO"]
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `USUARIO_NO_ENCONTRADO` | No se encontro el usuario | 404 |
+| `ROL_INVALIDO` | Un codigo de rol no es valido | 400 |
+| `VALIDACION` | Mismo rol en agregar y quitar, o MIEMBRO_REFUGIO sin refugioId | 400 |
+| `NO_SE_PUEDE_EDITAR_ADMIN` | No se pueden modificar los roles de un administrador | 403 |
+| `REFUGIO_NO_ENCONTRADO` | El refugioId indicado no existe | 404 |
+| `ULTIMO_ADMINISTRADOR` | No se puede quitar el ultimo administrador | 409 |
+
+---
+
 # Gestión de Refugios
 
 > Estados posibles: `Pendiente_Verificacion`, `Activo`, `Suspendido`, `Inactivo` (baja logica). El valor `Suspendido` se incorpora al catalogo por el seed del modulo (spec backend 002).
@@ -706,6 +836,81 @@ Reactiva un refugio suspendido (`Suspendido` → `Activo`).
 |---|---|---|
 | `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
 | `ESTADO_INVALIDO` | El refugio no esta suspendido | 409 |
+
+---
+
+## `PATCH /api/v1/admin/refugios/:id/baja`
+
+Baja logica de un refugio (HU-2.4): setea fecha de baja y estado `Inactivo`. No tiene reversion por API.
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del refugio a dar de baja |
+
+**Body:**
+
+```json
+{
+  "motivo": "Refugio cerrado definitivamente"
+}
+```
+
+| Campo | Tipo | Requerido | Descripcion |
+|---|---|---|---|
+| `motivo` | string | si | Motivo de la baja (1-500 caracteres, se registra en auditoria) |
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Refugio dado de baja correctamente",
+  "refugio": {
+    "id": 2,
+    "estado": "Inactivo"
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
+| `REFUGIO_YA_DADO_DE_BAJA` | El refugio ya fue dado de baja | 409 |
+| `VALIDACION` | Motivo vacio o fuera de rango | 400 |
+
+---
+
+## `PATCH /api/v1/admin/refugios/:id/reactivar`
+
+Reactiva un refugio suspendido (`Suspendido` → `Activo`).
+
+**Parametro de URL:**
+
+| Nombre | Tipo | Descripcion |
+|---|---|---|
+| `id` | integer | ID del refugio a reactivar |
+
+**Respuesta:** `200 OK`
+
+```json
+{
+  "mensaje": "Refugio reactivado correctamente",
+  "refugio": {
+    "id": 2,
+    "estado": "Activo"
+  }
+}
+```
+
+**Errores:**
+
+| Codigo | Mensaje | HTTP |
+|---|---|---|
+| `REFUGIO_NO_ENCONTRADO` | No se encontro el refugio | 404 |
+| `ESTADO_INVALIDO` | El refugio no esta suspendido | 400 |
 
 ---
 
