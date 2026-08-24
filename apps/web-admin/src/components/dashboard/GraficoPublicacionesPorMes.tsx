@@ -19,10 +19,10 @@ export function GraficoPublicacionesPorMes({
   return (
     <Card className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-neutral-700">
+        <h2 className="text-sm font-semibold text-neutral-900">
           Publicaciones y adopciones (últimos 6 meses)
         </h2>
-        <div className="flex shrink-0 items-center gap-3 text-xs text-neutral-500">
+        <div className="flex shrink-0 items-center gap-3 text-xs font-medium text-neutral-700">
           <span className="flex items-center gap-1.5">
             <span
               className="h-2 w-2 rounded-full"
@@ -63,7 +63,7 @@ export function GraficoPublicacionesPorMes({
                 title={`Adopciones: ${item.adopciones}`}
               />
             </div>
-            <span className="text-xs text-neutral-500">{item.mes}</span>
+            <span className="text-xs font-medium text-neutral-700">{item.mes}</span>
           </div>
         ))}
       </div>
