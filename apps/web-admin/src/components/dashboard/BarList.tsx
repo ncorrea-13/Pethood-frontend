@@ -11,11 +11,11 @@ export function BarList({ titulo, items }: BarListProps) {
 
   return (
     <Card>
-      <h2 className="text-sm font-semibold text-neutral-700">{titulo}</h2>
+      <h2 className="text-sm font-semibold text-neutral-900">{titulo}</h2>
       <ul className="mt-4 space-y-3">
         {items.map((item) => (
           <li key={item.etiqueta} className="text-sm">
-            <div className="flex justify-between text-neutral-600">
+            <div className="flex justify-between text-neutral-800">
               <span>{item.etiqueta}</span>
               <span className="font-medium text-neutral-900">{item.valor}</span>
             </div>
