@@ -11,6 +11,7 @@
  * Los dos comparten la resolución de URL, la traducción de errores y el envío multipart.
  */
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 import type { ApiErrorBody } from '@/types/api';
 
@@ -63,6 +64,40 @@ export function urlAbsoluta(ruta: string | null | undefined): string | null {
   if (!ruta) return null;
   if (ruta.startsWith('http://') || ruta.startsWith('https://')) return ruta;
   return `${URL_BASE}${ruta.startsWith('/') ? ruta : `/${ruta}`}`;
+}
+
+export interface ArchivoAdjunto {
+  uri: string;
+  nombre: string;
+  tipo: string;
+}
+
+/**
+ * Adjunta un archivo (foto, documento) a un `FormData` de forma multiplataforma.
+ *
+ * En nativo, React Native reconoce el objeto `{ uri, name, type }` puesto en un `FormData` y
+ * lee el archivo local por su cuenta al armar el multipart. En web ese mecanismo no existe:
+ * el `FormData` ahí es el estándar del DOM, que solo acepta `string` o `Blob`/`File`. Pasarle
+ * ese objeto no tira error, pero tampoco sube nada — lo serializa como texto plano y el
+ * archivo llega vacío al backend. Por eso en web hay que resolver la uri (`blob:` o `data:`
+ * que devuelven los pickers de Expo) a un `Blob` real antes de adjuntarla.
+ */
+export async function adjuntarArchivo(
+  formData: FormData,
+  campo: string,
+  archivo: ArchivoAdjunto,
+): Promise<void> {
+  if (Platform.OS === 'web') {
+    const blob = await (await fetch(archivo.uri)).blob();
+    formData.append(campo, blob, archivo.nombre);
+    return;
+  }
+
+  formData.append(campo, {
+    uri: archivo.uri,
+    name: archivo.nombre,
+    type: archivo.tipo,
+  } as unknown as Blob);
 }
 
 const MENSAJE_ERROR_GENERICO =
