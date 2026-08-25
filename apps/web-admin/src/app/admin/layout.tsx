@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const token = (await cookies()).get(AUTH_COOKIE)?.value;
   const sesion = decodeSesion(token);
 
-  if (!sesion) redirect("/login");
+  if (!sesion) redirect(token ? "/salir" : "/login");
   if (!tieneRol(sesion, "ADMIN")) redirect("/refugio/dashboard");
 
   return (

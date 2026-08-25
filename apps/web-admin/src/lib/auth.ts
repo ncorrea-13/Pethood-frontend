@@ -10,6 +10,7 @@ export interface Sesion {
 
 // Decodifica el payload del JWT sin verificar firma — solo para UX (routing/nav condicional).
 // La autorización real siempre la valida el backend (CLAUDE.md: "validar en el cliente es solo para UX").
+// Si el token está malformado o ya pasó su `exp`, se trata como "sin sesión" para volver al login.
 export function decodeSesion(token: string | undefined | null): Sesion | null {
   if (!token) return null;
 
@@ -18,9 +19,10 @@ export function decodeSesion(token: string | undefined | null): Sesion | null {
 
   try {
     const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const json = atob(base64);
-    const data = JSON.parse(json);
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+    const data = JSON.parse(atob(padded));
     if (!data?.usuarioId || !Array.isArray(data?.roles)) return null;
+    if (typeof data.exp === "number" && data.exp * 1000 <= Date.now()) return null;
     return { id: data.usuarioId, roles: data.roles };
   } catch {
     return null;

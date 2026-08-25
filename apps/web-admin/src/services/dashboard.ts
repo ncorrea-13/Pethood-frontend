@@ -1,5 +1,6 @@
-import { apiFetch } from "./api";
+import { apiFetch, API_URL, forzarLogoutSiNoAutenticado } from "./api";
 import type { DashboardAdmin, DashboardRefugio, EntidadExportable, PeriodoDashboard } from "@/types/dashboard";
+import type { ApiErrorBody } from "@/types/api";
 
 export function obtenerDashboard(token: string): Promise<DashboardAdmin> {
   return apiFetch<DashboardAdmin>("/admin/dashboard", { token });
@@ -11,13 +12,13 @@ export function esDashboardVacio(dashboard: DashboardAdmin): boolean {
 
 // GET exportar/:entidad no devuelve JSON — se usa aparte de apiFetch (que siempre parsea JSON).
 export async function descargarExportacion(entidad: EntidadExportable, token: string): Promise<Blob> {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/v1";
   const res = await fetch(`${API_URL}/admin/dashboard/exportar/${entidad}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => null);
+    const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
+    await forzarLogoutSiNoAutenticado(res.status, body?.error?.codigo);
     throw new Error(body?.error?.mensaje ?? "No se pudo generar la exportación.");
   }
 
@@ -43,13 +44,13 @@ export function esDashboardRefugioVacio(dashboard: DashboardRefugio): boolean {
 
 // Igual que descargarExportacion: no pasa por apiFetch porque la respuesta no es JSON.
 export async function descargarExportacionRefugio(periodo: PeriodoDashboard, token: string): Promise<Blob> {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api/v1";
   const res = await fetch(`${API_URL}/refugio/dashboard/exportar?desde=${periodo.desde}&hasta=${periodo.hasta}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => null);
+    const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
+    await forzarLogoutSiNoAutenticado(res.status, body?.error?.codigo);
     throw new Error(body?.error?.mensaje ?? "No se pudo generar la exportación.");
   }
 
