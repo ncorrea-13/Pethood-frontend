@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import { Link, router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { FechaNacimientoPicker } from '@/components/FechaNacimientoPicker';
+import { useToast } from '@/components/feedback/Toast';
 import {
   enmascararFechaNacimiento,
   fechaADdMmAaaa,
@@ -25,6 +25,11 @@ import {
   parsearDdMmAaaa,
   validarFechaNacimiento,
 } from '@/lib/fechaNacimiento';
+import {
+  abrirSelectorImagen,
+  assetAArchivoLocal,
+  validarAssetImagen,
+} from '@/lib/elegirImagen';
 import type { ArchivoImagenLocal } from '@/lib/formDataImagen';
 import {
   sanitizarNombrePersona,
@@ -59,14 +64,8 @@ interface RegisterErrors {
   foto?: string;
 }
 
-const OPCIONES_IMAGEN: ImagePicker.ImagePickerOptions = {
-  mediaTypes: ['images'],
-  allowsEditing: true,
-  aspect: [1, 1],
-  quality: 0.8,
-};
-
 export default function RegisterScreen() {
+  const toast = useToast();
   const [form, setForm] = useState<RegisterForm>({
     firstName: '',
     lastName: '',
@@ -160,56 +159,30 @@ export default function RegisterScreen() {
     setShowDatePicker(false);
   };
 
-  const aplicarAsset = (asset: ImagePicker.ImagePickerAsset): void => {
-    setFoto({
-      uri: asset.uri,
-      mimeType: asset.mimeType,
-      fileName: asset.fileName,
-    });
+  const aplicarAsset = (asset: ImagePickerAsset): void => {
+    const errorArchivo = validarAssetImagen(asset);
+    if (errorArchivo) {
+      setErrors((prev) => ({ ...prev, foto: errorArchivo }));
+      return;
+    }
+
+    setFoto(assetAArchivoLocal(asset));
     setErrors((prev) => ({ ...prev, foto: undefined }));
   };
 
-  const elegirDeGaleria = async (): Promise<void> => {
-    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permiso.granted) {
-      setErrors((prev) => ({
-        ...prev,
-        foto: 'Necesitamos permiso para acceder a tus fotos.',
-      }));
-      return;
-    }
-
-    const resultado = await ImagePicker.launchImageLibraryAsync(OPCIONES_IMAGEN);
-    if (!resultado.canceled && resultado.assets[0]) {
-      aplicarAsset(resultado.assets[0]);
-    }
-  };
-
-  const tomarFoto = async (): Promise<void> => {
-    const permiso = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permiso.granted) {
-      setErrors((prev) => ({
-        ...prev,
-        foto: 'Necesitamos permiso para usar la cámara.',
-      }));
-      return;
-    }
-
-    const resultado = await ImagePicker.launchCameraAsync(OPCIONES_IMAGEN);
-    if (!resultado.canceled && resultado.assets[0]) {
-      aplicarAsset(resultado.assets[0]);
-    }
+  const setErrorFoto = (mensaje: string): void => {
+    setErrors((prev) => ({ ...prev, foto: mensaje }));
   };
 
   const abrirSelectorFoto = (): void => {
-    Alert.alert('Foto de perfil', '¿De dónde querés tomarla?', [
-      { text: 'Cámara', onPress: () => void tomarFoto() },
-      { text: 'Galería', onPress: () => void elegirDeGaleria() },
-      ...(foto
-        ? [{ text: 'Quitar foto', style: 'destructive' as const, onPress: () => setFoto(undefined) }]
-        : []),
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
+    abrirSelectorImagen({
+      titulo: 'Foto de perfil',
+      mensaje: '¿De dónde querés tomarla?',
+      onElegida: aplicarAsset,
+      onQuitar: foto ? () => setFoto(undefined) : undefined,
+      onErrorPermisoGaleria: setErrorFoto,
+      onErrorPermisoCamara: setErrorFoto,
+    });
   };
 
   const validateForm = (): boolean => {
@@ -244,6 +217,7 @@ export default function RegisterScreen() {
         },
         foto,
       );
+      toast.mostrarExito('Tu cuenta fue creada con éxito');
       router.replace('/login');
     } catch (error) {
       const mensaje =
@@ -309,6 +283,16 @@ export default function RegisterScreen() {
                 </View>
               </Pressable>
               <Text className="mt-2 text-sm text-gray-500">Foto de perfil (opcional)</Text>
+              {foto && Platform.OS === 'web' ? (
+                <Pressable
+                  onPress={() => setFoto(undefined)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Quitar foto de perfil"
+                  className="mt-1"
+                >
+                  <Text className="text-sm font-semibold text-red-500">Quitar foto</Text>
+                </Pressable>
+              ) : null}
               {errors.foto ? (
                 <Text className="mt-1.5 text-sm text-red-500">{errors.foto}</Text>
               ) : null}

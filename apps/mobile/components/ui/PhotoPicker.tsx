@@ -7,8 +7,9 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, Text, View } from 'react-native';
+import { Alert, Image, Pressable, Text, View } from 'react-native';
+
+import { abrirSelectorImagen } from '@/lib/elegirImagen';
 import { LIMITES } from '../../shared/validation/limits';
 
 export interface FotoElegida {
@@ -54,8 +55,6 @@ export function PhotoPicker({
   error,
   permiteQuitar = true,
 }: PhotoPickerProps) {
-  const [cargando, setCargando] = useState(false);
-
   const procesar = (resultado: ImagePicker.ImagePickerResult): void => {
     if (resultado.canceled || !resultado.assets[0]) return;
 
@@ -82,45 +81,19 @@ export function PhotoPicker({
     onChange({ uri: asset.uri, nombre: `mascota.${extension}`, tipo });
   };
 
-  const abrirGaleria = async (): Promise<void> => {
-    setCargando(true);
-    try {
-      procesar(
-        await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ['images'],
-          quality: 0.8,
-        }),
-      );
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  const abrirCamara = async (): Promise<void> => {
-    const permiso = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (!permiso.granted) {
-      Alert.alert(
-        'Necesitamos la cámara',
-        'Dale permiso a PetHood para usar la cámara, o elegí una foto de la galería.',
-      );
-      return;
-    }
-
-    setCargando(true);
-    try {
-      procesar(await ImagePicker.launchCameraAsync({ quality: 0.8 }));
-    } finally {
-      setCargando(false);
-    }
-  };
-
   const elegir = (): void => {
-    Alert.alert('Foto de la mascota', '¿De dónde querés sacar la foto?', [
-      { text: 'Cámara', onPress: () => void abrirCamara() },
-      { text: 'Galería', onPress: () => void abrirGaleria() },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
+    abrirSelectorImagen({
+      titulo: 'Foto de la mascota',
+      mensaje: '¿De dónde querés sacar la foto?',
+      opciones: { mediaTypes: ['images'], quality: 0.8 },
+      onElegida: (asset) => procesar({ canceled: false, assets: [asset] }),
+      onErrorPermisoGaleria: (mensaje) => Alert.alert('Necesitamos tus fotos', mensaje),
+      onErrorPermisoCamara: () =>
+        Alert.alert(
+          'Necesitamos la cámara',
+          'Dale permiso a PetHood para usar la cámara, o elegí una foto de la galería.',
+        ),
+    });
   };
 
   return (
@@ -159,19 +132,12 @@ export function PhotoPicker({
           accessibilityRole="button"
           accessibilityLabel="Agregar fotos"
           onPress={elegir}
-          disabled={cargando}
           className={`h-32 items-center justify-center rounded-3xl border-2 border-dashed ${
             error ? 'border-red-300 bg-red-50' : 'border-pethood-orange/40 bg-white/60'
           }`}
         >
-          {cargando ? (
-            <ActivityIndicator color="#FF9D5C" />
-          ) : (
-            <>
-              <Ionicons name="camera-outline" size={28} color="#FF9D5C" />
-              <Text className="mt-1.5 text-sm font-medium text-gray-500">Agregar fotos</Text>
-            </>
-          )}
+          <Ionicons name="camera-outline" size={28} color="#FF9D5C" />
+          <Text className="mt-1.5 text-sm font-medium text-gray-500">Agregar fotos</Text>
         </Pressable>
       )}
 
