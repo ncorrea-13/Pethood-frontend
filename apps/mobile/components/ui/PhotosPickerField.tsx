@@ -5,7 +5,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { elegirArchivosWeb } from '@/lib/elegirImagen';
 import { LIMITES } from '../../shared/validation/limits';
 
 export interface FotoElegida {
@@ -111,6 +112,13 @@ export function PhotosPickerField({ fotos, onChange, maximo, error }: PhotosPick
   const elegir = (): void => {
     if (lleno) {
       Alert.alert('Llegaste al máximo', `Podés subir hasta ${maximo} fotos.`);
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      void elegirArchivosWeb(true).then((assets) => {
+        if (assets.length > 0) procesar({ canceled: false, assets });
+      });
       return;
     }
 

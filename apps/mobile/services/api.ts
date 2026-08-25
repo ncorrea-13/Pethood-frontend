@@ -15,7 +15,7 @@ import { Platform } from 'react-native';
 
 import type { ApiErrorBody } from '@/types/api';
 
-import { obtenerToken } from './sesion';
+import { invalidarSesionPorToken, obtenerToken } from './sesion';
 
 /** Error de la API ya traducido a algo mostrable al usuario. */
 export class ApiError extends Error {
@@ -123,13 +123,24 @@ function interpretarCuerpo(texto: string): unknown {
   }
 }
 
+async function rechazarRespuesta(status: number, cuerpo: unknown): Promise<never> {
+  const error = aApiError(status, cuerpo);
+
+  // Solo NO_AUTENTICADO: CREDENCIALES_INVALIDAS (login / contraseña actual) no cierra sesión.
+  if (error.status === 401 && error.codigo === 'NO_AUTENTICADO') {
+    await invalidarSesionPorToken();
+  }
+
+  throw error;
+}
+
 async function procesarRespuesta<T>(respuesta: Response): Promise<T> {
   if (respuesta.ok) {
     return respuesta.status === 204 ? (undefined as T) : ((await respuesta.json()) as T);
   }
 
   const cuerpo = await respuesta.json().catch(() => null);
-  throw aApiError(respuesta.status, cuerpo);
+  return rechazarRespuesta(respuesta.status, cuerpo);
 }
 
 async function cabeceras(extra: Record<string, string> = {}): Promise<Record<string, string>> {
@@ -193,7 +204,7 @@ async function enviarFormData<T>(
         return;
       }
 
-      reject(aApiError(peticion.status, cuerpo));
+      void rechazarRespuesta(peticion.status, cuerpo).catch(reject);
     };
 
     peticion.onerror = () =>
