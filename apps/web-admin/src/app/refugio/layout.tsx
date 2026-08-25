@@ -10,7 +10,7 @@ export default async function RefugioLayout({ children }: { children: React.Reac
   const token = (await cookies()).get(AUTH_COOKIE)?.value;
   const sesion = decodeSesion(token);
 
-  if (!sesion) redirect("/login");
+  if (!sesion) redirect(token ? "/salir" : "/login");
   if (!tieneRol(sesion, "MIEMBRO_REFUGIO")) redirect("/admin/dashboard");
 
   return (
