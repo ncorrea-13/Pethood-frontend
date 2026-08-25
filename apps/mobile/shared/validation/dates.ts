@@ -90,3 +90,20 @@ export function validarFechaPasada(
 
   return null;
 }
+
+/**
+ * Fecha de algo que todavía no pasó (próximo control de la historia clínica): opcional,
+ * pero si viene tiene que ser estrictamente posterior a hoy.
+ */
+export function validarFechaFutura(
+  valor: string | Date | null | undefined,
+  etiqueta: string,
+): string | null {
+  if (valor === null || valor === undefined || valor === '') return null;
+
+  const fecha = parsearFecha(valor);
+  if (!fecha) return `${etiqueta} no es válida`;
+  if (!esFutura(fecha)) return `${etiqueta} debe ser posterior a hoy`;
+
+  return null;
+}
