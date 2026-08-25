@@ -1,4 +1,4 @@
-import { del, get, patchFormData, postFormData } from './api';
+import { adjuntarArchivo, del, get, patchFormData, postFormData } from './api';
 
 export type Tamanio = 'PEQUENO' | 'MEDIANO' | 'GRANDE';
 export type Genero = 'MACHO' | 'HEMBRA';
@@ -55,13 +55,7 @@ export async function crearMascota(datos: DatosNuevaMascota): Promise<Mascota> {
   if (datos.destino) formData.append('destino', datos.destino);
   if (datos.estadoMascotaId) formData.append('estadoMascotaId', String(datos.estadoMascotaId));
 
-  // Formato de archivo propio de React Native: el XHR que usa postFormData lee la uri
-  // local y la sube sin pasar los bytes por JavaScript.
-  formData.append('foto', {
-    uri: datos.foto.uri,
-    name: datos.foto.nombre,
-    type: datos.foto.tipo,
-  } as unknown as Blob);
+  await adjuntarArchivo(formData, 'foto', datos.foto);
 
   return postFormData('/mascotas', formData);
 }
@@ -99,7 +93,7 @@ export interface CambiosMascota {
   foto?: { uri: string; nombre: string; tipo: string };
 }
 
-export function editarMascota(id: number, cambios: CambiosMascota): Promise<Mascota> {
+export async function editarMascota(id: number, cambios: CambiosMascota): Promise<Mascota> {
   const formData = new FormData();
 
   // Se compara contra undefined y no por truthiness: `castrado: false` y `descripcion: ''`
@@ -117,11 +111,7 @@ export function editarMascota(id: number, cambios: CambiosMascota): Promise<Masc
   if (cambios.descripcion !== undefined) formData.append('descripcion', cambios.descripcion);
 
   if (cambios.foto) {
-    formData.append('foto', {
-      uri: cambios.foto.uri,
-      name: cambios.foto.nombre,
-      type: cambios.foto.tipo,
-    } as unknown as Blob);
+    await adjuntarArchivo(formData, 'foto', cambios.foto);
   }
 
   return patchFormData(`/mascotas/${id}`, formData);
@@ -164,7 +154,7 @@ export interface Publicacion {
   usuarioId: number;
 }
 
-export function crearPublicacion(datos: DatosNuevaPublicacion): Promise<Publicacion> {
+export async function crearPublicacion(datos: DatosNuevaPublicacion): Promise<Publicacion> {
   const formData = new FormData();
 
   formData.append('mascotaId', String(datos.mascotaId));
@@ -178,11 +168,7 @@ export function crearPublicacion(datos: DatosNuevaPublicacion): Promise<Publicac
   for (const rasgo of datos.personalidad) formData.append('personalidad', rasgo);
 
   for (const foto of datos.fotos) {
-    formData.append('fotos', {
-      uri: foto.uri,
-      name: foto.nombre,
-      type: foto.tipo,
-    } as unknown as Blob);
+    await adjuntarArchivo(formData, 'fotos', foto);
   }
 
   return postFormData('/publicaciones', formData);
