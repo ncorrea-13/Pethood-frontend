@@ -2,15 +2,13 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { AUTH_COOKIE, decodeSesion, tieneRol } from "@/lib/auth";
+import { AUTH_COOKIE, decodeSesion, tieneRol, tokenExp } from "@/lib/auth";
 import { ApiError } from "@/services/api";
 import { login } from "@/services/auth";
 
 export interface EstadoLogin {
   error?: string;
 }
-
-const SEMANA_EN_SEGUNDOS = 60 * 60 * 24 * 7;
 
 // Este panel es exclusivo para Administrador y Refugio (CLAUDE.md) — un Adoptante
 // puede loguearse con las mismas credenciales pero no tiene lugar acá, así que se
@@ -39,12 +37,15 @@ export async function loginAction(_estadoPrevio: EstadoLogin, formData: FormData
     return { error: "Este panel es exclusivo para administradores y refugios." };
   }
 
+  const exp = tokenExp(respuesta.token);
+  const maxAge = Math.max(exp - Math.floor(Date.now() / 1000), 0);
+
   (await cookies()).set(AUTH_COOKIE, respuesta.token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SEMANA_EN_SEGUNDOS,
+    maxAge,
   });
 
   redirect(esAdmin ? "/admin/dashboard" : "/refugio/dashboard");

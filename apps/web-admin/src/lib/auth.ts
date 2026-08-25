@@ -32,3 +32,17 @@ export function decodeSesion(token: string | undefined | null): Sesion | null {
 export function tieneRol(sesion: Sesion | null, rol: RolUsuario): boolean {
   return sesion?.roles.includes(rol) ?? false;
 }
+
+/** Extrae el `exp` (seconds) del JWT. Devuelve 0 si no existe o es ilegible. */
+export function tokenExp(token: string): number {
+  const payload = token.split(".")[1];
+  if (!payload) return 0;
+  try {
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+    const data = JSON.parse(atob(padded));
+    return typeof data.exp === "number" ? data.exp : 0;
+  } catch {
+    return 0;
+  }
+}
