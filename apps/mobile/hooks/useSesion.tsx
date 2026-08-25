@@ -10,6 +10,8 @@ import {
   guardarUsuario,
   obtenerToken,
   obtenerUsuario,
+  suscribirSesionInvalida,
+  tokenInvalidoOExpirado,
 } from '@/services/sesion';
 import type { Usuario } from '@/types/auth';
 
@@ -46,11 +48,22 @@ export function SesionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void Promise.all([obtenerToken(), obtenerUsuario()])
-      .then(([tokenGuardado, usuarioGuardado]) => {
+      .then(async ([tokenGuardado, usuarioGuardado]) => {
+        if (tokenGuardado && tokenInvalidoOExpirado(tokenGuardado)) {
+          await borrarSesion();
+          return;
+        }
         setToken(tokenGuardado);
         setUsuario(usuarioGuardado);
       })
       .finally(() => setCargando(false));
+  }, []);
+
+  useEffect(() => {
+    return suscribirSesionInvalida(() => {
+      setToken(null);
+      setUsuario(null);
+    });
   }, []);
 
   const establecerSesion = useCallback(async (nuevoToken: string, nuevoUsuario: Usuario) => {

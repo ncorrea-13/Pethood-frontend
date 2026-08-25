@@ -3,7 +3,7 @@
  * Volver con cambios sin guardar pide confirmación.
  */
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import { useNavigation, useRouter, type Href } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -24,6 +24,11 @@ import { useToast } from '@/components/feedback/Toast';
 import { FormCard, FormCardRow } from '@/components/ui/FormCard';
 import { TextField } from '@/components/ui/TextField';
 import { useSesion } from '@/hooks/useSesion';
+import {
+  abrirSelectorImagen,
+  assetAArchivoLocal,
+  validarAssetImagen,
+} from '@/lib/elegirImagen';
 import type { ArchivoImagenLocal } from '@/lib/formDataImagen';
 import {
   sanitizarNombrePersona,
@@ -35,13 +40,6 @@ import {
 } from '@/lib/validacionRegistro';
 import { ApiError, urlAbsoluta } from '@/services/api';
 import { actualizarPerfil, obtenerPerfil } from '@/services/usuarios';
-
-const OPCIONES_IMAGEN: ImagePicker.ImagePickerOptions = {
-  mediaTypes: ['images'],
-  allowsEditing: true,
-  aspect: [1, 1],
-  quality: 0.8,
-};
 
 interface Formulario {
   nombre: string;
@@ -178,40 +176,23 @@ export default function EditarPerfilScreen() {
     setFieldError('ubicacion', value.trim() ? validarUbicacion(value) : undefined);
   };
 
-  const aplicarAsset = (asset: ImagePicker.ImagePickerAsset): void => {
-    setFotoNueva({
-      uri: asset.uri,
-      mimeType: asset.mimeType,
-      fileName: asset.fileName,
-    });
-  };
-
-  const elegirDeGaleria = async (): Promise<void> => {
-    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permiso.granted) {
-      Alert.alert('Necesitamos tus fotos', 'Dale permiso a PetHood para elegir una imagen.');
+  const aplicarAsset = (asset: ImagePickerAsset): void => {
+    const errorArchivo = validarAssetImagen(asset);
+    if (errorArchivo) {
+      toast.mostrarError(errorArchivo);
       return;
     }
-    const resultado = await ImagePicker.launchImageLibraryAsync(OPCIONES_IMAGEN);
-    if (!resultado.canceled && resultado.assets[0]) aplicarAsset(resultado.assets[0]);
-  };
-
-  const tomarFoto = async (): Promise<void> => {
-    const permiso = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permiso.granted) {
-      Alert.alert('Necesitamos la cámara', 'Dale permiso a PetHood para sacar una foto.');
-      return;
-    }
-    const resultado = await ImagePicker.launchCameraAsync(OPCIONES_IMAGEN);
-    if (!resultado.canceled && resultado.assets[0]) aplicarAsset(resultado.assets[0]);
+    setFotoNueva(assetAArchivoLocal(asset));
   };
 
   const abrirSelectorFoto = (): void => {
-    Alert.alert('Foto de perfil', '¿De dónde querés tomarla?', [
-      { text: 'Cámara', onPress: () => void tomarFoto() },
-      { text: 'Galería', onPress: () => void elegirDeGaleria() },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
+    abrirSelectorImagen({
+      titulo: 'Foto de perfil',
+      mensaje: '¿De dónde querés tomarla?',
+      onElegida: aplicarAsset,
+      onErrorPermisoGaleria: (mensaje) => Alert.alert('Necesitamos tus fotos', mensaje),
+      onErrorPermisoCamara: (mensaje) => Alert.alert('Necesitamos la cámara', mensaje),
+    });
   };
 
   const validar = (): boolean => {

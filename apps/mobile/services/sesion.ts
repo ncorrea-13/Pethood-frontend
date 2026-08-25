@@ -76,3 +76,47 @@ export async function borrarSesion(): Promise<void> {
   await borrar(CLAVE_TOKEN);
   await borrar(CLAVE_USUARIO);
 }
+
+type ListenerSesionInvalida = () => void;
+const listenersSesionInvalida = new Set<ListenerSesionInvalida>();
+
+/** El provider de sesión se anota acá para volver al login cuando el token deja de servir. */
+export function suscribirSesionInvalida(listener: ListenerSesionInvalida): () => void {
+  listenersSesionInvalida.add(listener);
+  return () => {
+    listenersSesionInvalida.delete(listener);
+  };
+}
+
+/**
+ * True si el JWT no se puede leer o ya pasó su `exp`. No verifica firma: eso lo hace
+ * el backend. Sirve para no restaurar una sesión que el usuario ya no podría usar.
+ */
+export function tokenInvalidoOExpirado(token: string): boolean {
+  const payload = decodificarPayloadJwt(token);
+  if (!payload) return true;
+  if (typeof payload.exp !== 'number') return false;
+  return payload.exp * 1000 <= Date.now();
+}
+
+function decodificarPayloadJwt(token: string): { exp?: number } | null {
+  const segmento = token.split('.')[1];
+  if (!segmento) return null;
+
+  try {
+    const base64 = segmento.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    return JSON.parse(atob(padded)) as { exp?: number };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Borra la sesión local y avisa al provider para volver al login. No llama al backend:
+ * si llegamos acá el token ya no sirve (inválido o vencido).
+ */
+export async function invalidarSesionPorToken(): Promise<void> {
+  await borrarSesion();
+  listenersSesionInvalida.forEach((listener) => listener());
+}
