@@ -42,13 +42,13 @@ export function DonutChart({ titulo, items }: DonutChartProps) {
 
   return (
     <Card>
-      <h2 className="text-sm font-semibold text-neutral-700">{titulo}</h2>
+      <h2 className="text-sm font-semibold text-neutral-900">{titulo}</h2>
       <div className="mt-4 flex items-center gap-6">
         <div className="relative h-24 w-24 shrink-0">
           <div className="h-24 w-24 rounded-full" style={{ background: `conic-gradient(${stops})` }} />
           <div className="absolute inset-3 flex flex-col items-center justify-center rounded-full bg-white">
             <span className="text-base font-semibold leading-none text-neutral-900">{total}</span>
-            <span className="mt-1 text-[10px] leading-none text-neutral-400">total</span>
+            <span className="mt-1 text-[10px] leading-none text-neutral-500">total</span>
           </div>
         </div>
         <ul className="w-full space-y-2 text-sm">
@@ -58,7 +58,7 @@ export function DonutChart({ titulo, items }: DonutChartProps) {
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ background: configDe(item.etiqueta).color }}
               />
-              <span className="text-neutral-600">{configDe(item.etiqueta).etiqueta}</span>
+              <span className="text-neutral-800">{configDe(item.etiqueta).etiqueta}</span>
               <span className="ml-auto font-medium text-neutral-900">
                 {Math.round((item.valor / total) * 100)}%
               </span>

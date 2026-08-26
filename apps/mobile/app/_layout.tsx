@@ -10,10 +10,11 @@ import { useFonts } from 'expo-font';
 import { NavigationBar } from 'expo-navigation-bar';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Platform, View } from 'react-native';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import { BarraNavegacionSistema } from '@/components/BarraNavegacionSistema';
 import { ToastProvider } from '@/components/feedback/Toast';
 import { SesionProvider, useSesion } from '@/hooks/useSesion';
 
@@ -35,9 +36,9 @@ export default function RootLayout() {
           <StatusBar style="dark" />
           {/* Oculta la barra de navegación del sistema para ganar la franja inferior. No
               queda bloqueada: Android la vuelve a mostrar cuando el usuario desliza desde
-              el borde y la esconde sola al rato. Solo aplica en Android; en iOS y web el
-              módulo no existe. */}
-          {Platform.OS === 'android' ? <NavigationBar hidden /> : null}
+              el borde y la esconde sola al rato. El módulo es solo de Android; en iOS y
+              web BarraNavegacionSistema no importa expo-navigation-bar. */}
+          <BarraNavegacionSistema />
           <RootNavigator />
         </ToastProvider>
       </SesionProvider>

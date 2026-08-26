@@ -12,6 +12,8 @@ import {
   obtenerToken,
   obtenerUsuario,
   obtenerVistaRefugio,
+  suscribirSesionInvalida,
+  tokenInvalidoOExpirado,
 } from '@/services/sesion';
 import type { Usuario } from '@/types/auth';
 
@@ -52,12 +54,26 @@ export function SesionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void Promise.all([obtenerToken(), obtenerUsuario(), obtenerVistaRefugio()])
-      .then(([tokenGuardado, usuarioGuardado, vistaGuardada]) => {
+      .then(async ([tokenGuardado, usuarioGuardado, vistaGuardada]) => {
+        if (tokenGuardado && tokenInvalidoOExpirado(tokenGuardado)) {
+          await borrarSesion();
+          return;
+        }
+
         setToken(tokenGuardado);
         setUsuario(usuarioGuardado);
         setVistaRefugioElegida(vistaGuardada);
       })
       .finally(() => setCargando(false));
+  }, []);
+
+  // La sesión puede caducar con la app abierta: el cliente avisa y acá se limpia el
+  // estado para que la navegación mande al login.
+  useEffect(() => {
+    return suscribirSesionInvalida(() => {
+      setToken(null);
+      setUsuario(null);
+    });
   }, []);
 
   const cambiarVistaRefugio = useCallback(async (activa: boolean) => {

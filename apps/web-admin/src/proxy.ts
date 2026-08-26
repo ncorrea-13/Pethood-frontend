@@ -14,14 +14,25 @@ export function proxy(request: NextRequest) {
   if ((esRutaAdmin || esRutaRefugio) && !sesion) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    const respuesta = NextResponse.redirect(loginUrl);
+    // Cookie presente pero JWT vencido o ilegible: se borra para no reabrir el panel.
+    if (request.cookies.get(AUTH_COOKIE)) {
+      respuesta.cookies.set(AUTH_COOKIE, "", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 0,
+      });
+    }
+    return respuesta;
   }
 
   if (esRutaAdmin && sesion && !tieneRol(sesion, "ADMIN")) {
     return NextResponse.redirect(new URL("/refugio/dashboard", request.url));
   }
 
-  if (esRutaRefugio && sesion && !tieneRol(sesion, "REFUGIO")) {
+  if (esRutaRefugio && sesion && !tieneRol(sesion, "MIEMBRO_REFUGIO")) {
     return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 

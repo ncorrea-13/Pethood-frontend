@@ -2,7 +2,7 @@
  * GUI-04 Mascotas Adoptante — listado de las mascotas propias, acceso a la creación y
  * punto de entrada a editar (HU-6.2) y eliminar (HU-6.3) cada una.
  */
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, Image, Pressable, RefreshControl, Text, View } from 'react-native';
@@ -35,9 +35,16 @@ interface TarjetaMascotaProps {
   esPropia: boolean;
   onEditar: () => void;
   onEliminar: () => void;
+  onVerHistoriaClinica: () => void;
 }
 
-function TarjetaMascota({ mascota, esPropia, onEditar, onEliminar }: TarjetaMascotaProps) {
+function TarjetaMascota({
+  mascota,
+  esPropia,
+  onEditar,
+  onEliminar,
+  onVerHistoriaClinica,
+}: TarjetaMascotaProps) {
   const foto = urlAbsoluta(mascota.imagenUrl);
 
   return (
@@ -65,29 +72,45 @@ function TarjetaMascota({ mascota, esPropia, onEditar, onEliminar }: TarjetaMasc
         <View className="mt-2 flex-row items-center justify-between">
           <EstadoMascotaBadge estado={mascota.estado.nombre} />
 
-          {esPropia ? (
-            <View className="flex-row gap-1.5">
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Editar ${mascota.nombre}`}
-                onPress={onEditar}
-                hitSlop={6}
-                className="h-9 w-9 items-center justify-center rounded-full bg-gray-100 active:opacity-70"
-              >
-                <Ionicons name="pencil" size={16} color={PALETA.gris[600]} />
-              </Pressable>
+          <View className="flex-row gap-1.5">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Historia clínica de ${mascota.nombre}`}
+              onPress={onVerHistoriaClinica}
+              hitSlop={6}
+              className="h-9 w-9 items-center justify-center rounded-full bg-orange-50 active:opacity-70"
+            >
+              <MaterialCommunityIcons
+                name="clipboard-pulse-outline"
+                size={17}
+                color={PALETA.pethood.naranjaIntensa}
+              />
+            </Pressable>
 
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Eliminar ${mascota.nombre}`}
-                onPress={onEliminar}
-                hitSlop={6}
-                className="h-9 w-9 items-center justify-center rounded-full bg-red-50 active:opacity-70"
-              >
-                <Ionicons name="trash-outline" size={16} color={PALETA.estado.error} />
-              </Pressable>
-            </View>
-          ) : null}
+            {esPropia ? (
+              <>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Editar ${mascota.nombre}`}
+                  onPress={onEditar}
+                  hitSlop={6}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-gray-100 active:opacity-70"
+                >
+                  <Ionicons name="pencil" size={16} color={PALETA.gris[600]} />
+                </Pressable>
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Eliminar ${mascota.nombre}`}
+                  onPress={onEliminar}
+                  hitSlop={6}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-red-50 active:opacity-70"
+                >
+                  <Ionicons name="trash-outline" size={16} color={PALETA.estado.error} />
+                </Pressable>
+              </>
+            ) : null}
+          </View>
         </View>
       </View>
     </View>
@@ -220,6 +243,12 @@ export default function MisMascotasScreen() {
                   router.push({ pathname: '/mascotas/[id]/editar', params: { id: item.id } })
                 }
                 onEliminar={() => setAEliminar(item)}
+                onVerHistoriaClinica={() =>
+                  router.push({
+                    pathname: '/mascotas/[id]/historia-clinica',
+                    params: { id: item.id },
+                  })
+                }
               />
             )}
             ListEmptyComponent={ListaVacia}
