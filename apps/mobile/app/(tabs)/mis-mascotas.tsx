@@ -160,7 +160,7 @@ export default function MisMascotasScreen() {
   const cargar = useCallback(async (): Promise<void> => {
     try {
       setError(null);
-      setMascotas(await listarMisMascotas());
+      setMascotas(await listarMisMascotas(esRefugio ? 'REFUGIO' : 'PERSONAL'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No pudimos cargar tus mascotas.');
     } finally {
