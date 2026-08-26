@@ -4,6 +4,9 @@ export type Tamanio = 'PEQUENO' | 'MEDIANO' | 'GRANDE';
 export type Genero = 'MACHO' | 'HEMBRA';
 export type Destino = 'PROPIA' | 'ADOPCION';
 
+/** Qué conjunto de mascotas se pide: las propias del usuario o las del refugio. */
+export type AmbitoMascotas = 'PERSONAL' | 'REFUGIO';
+
 export interface Mascota {
   id: number;
   nombre: string | null;
@@ -60,13 +63,21 @@ export async function crearMascota(datos: DatosNuevaMascota): Promise<Mascota> {
   return postFormData('/mascotas', formData);
 }
 
-export function listarMisMascotas(): Promise<Mascota[]> {
-  return get('/mascotas/mias');
+/**
+ * Quien pertenece a un refugio tiene dos conjuntos separados: las mascotas que cargó como
+ * persona y las del refugio, que son de todos sus miembros. El alta hecha desde el refugio
+ * queda en el segundo, así que pedir el ámbito equivocado devuelve una lista sin ellas.
+ */
+export function listarMisMascotas(ambito: AmbitoMascotas = 'PERSONAL'): Promise<Mascota[]> {
+  return get(`/mascotas/mias?ambito=${ambito}`);
 }
 
 /** No hay endpoint `GET /mascotas/:id`: la ficha propia se busca dentro del listado. */
-export async function obtenerMiMascota(id: number): Promise<Mascota | null> {
-  const mascotas = await listarMisMascotas();
+export async function obtenerMiMascota(
+  id: number,
+  ambito: AmbitoMascotas = 'PERSONAL',
+): Promise<Mascota | null> {
+  const mascotas = await listarMisMascotas(ambito);
   return mascotas.find((mascota) => mascota.id === id) ?? null;
 }
 

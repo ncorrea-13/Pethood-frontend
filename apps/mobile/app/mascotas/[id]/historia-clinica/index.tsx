@@ -11,6 +11,7 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EstadoCargando, EstadoError, EstadoVacio } from '@/components/feedback/EstadosPantalla';
+import { useSesion } from '@/hooks/useSesion';
 import { obtenerMiMascota, type Mascota } from '@/services/mascotas';
 import { listarHistorial, type HistoriaClinica } from '@/services/historia-clinica';
 import { aFechaVisible, parsearFecha } from '@/shared/validation/dates';
@@ -77,6 +78,7 @@ export default function HistoriaClinicaScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const mascotaId = Number(id);
+  const { esRefugio } = useSesion();
 
   const [mascota, setMascota] = useState<Mascota | null>(null);
   const [registros, setRegistros] = useState<HistoriaClinica[]>([]);
@@ -93,7 +95,7 @@ export default function HistoriaClinicaScreen() {
     try {
       setError(null);
       const [mascotaCargada, historial] = await Promise.all([
-        obtenerMiMascota(mascotaId),
+        obtenerMiMascota(mascotaId, esRefugio ? 'REFUGIO' : 'PERSONAL'),
         listarHistorial(mascotaId),
       ]);
 
@@ -109,7 +111,7 @@ export default function HistoriaClinicaScreen() {
     } finally {
       setCargando(false);
     }
-  }, [mascotaId]);
+  }, [mascotaId, esRefugio]);
 
   useFocusEffect(
     useCallback(() => {
