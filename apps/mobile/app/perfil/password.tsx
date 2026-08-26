@@ -20,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { useToast } from '@/components/feedback/Toast';
+import { PALETA } from '@/constants/theme';
 import { useSesion } from '@/hooks/useSesion';
 import { validarConfirmacionPassword, validarPassword } from '@/lib/validacionRegistro';
 import { ApiError } from '@/services/api';
@@ -93,14 +94,14 @@ export default function CambiarPasswordScreen() {
             accessibilityRole="button"
             accessibilityLabel="Volver"
           >
-            <Ionicons name="arrow-back" size={22} color="#374151" />
+            <Ionicons name="arrow-back" size={22} color={PALETA.gris[700]} />
           </Pressable>
           <Text className="text-2xl font-bold text-pethood-orange">Actualizar contraseña</Text>
         </View>
 
         {cargando ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator color="#FF9D5C" />
+            <ActivityIndicator color={PALETA.pethood.naranja} />
           </View>
         ) : (
           <KeyboardAvoidingView
@@ -133,7 +134,7 @@ export default function CambiarPasswordScreen() {
                     <Ionicons
                       name={showActual ? 'eye-off-outline' : 'eye-outline'}
                       size={22}
-                      color="#9CA3AF"
+                      color={PALETA.gris[400]}
                     />
                   }
                   onRightIconPress={() => setShowActual((prev) => !prev)}
@@ -155,7 +156,7 @@ export default function CambiarPasswordScreen() {
                   <Ionicons
                     name={showNueva ? 'eye-off-outline' : 'eye-outline'}
                     size={22}
-                    color="#9CA3AF"
+                    color={PALETA.gris[400]}
                   />
                 }
                 onRightIconPress={() => setShowNueva((prev) => !prev)}
@@ -176,7 +177,7 @@ export default function CambiarPasswordScreen() {
                   <Ionicons
                     name={showConfirmacion ? 'eye-off-outline' : 'eye-outline'}
                     size={22}
-                    color="#9CA3AF"
+                    color={PALETA.gris[400]}
                   />
                 }
                 onRightIconPress={() => setShowConfirmacion((prev) => !prev)}

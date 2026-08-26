@@ -1,8 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+// Import interno (expo-router no lo re-exporta): es el mismo botón que la barra usa por
+// defecto. Se reusa en vez de escribir un Pressable propio porque trae el centrado de
+// ícono y label — sustituirlo por uno hecho a mano los desalinea.
+import { PlatformPressable } from 'expo-router/build/react-navigation/elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BotonTabCentral } from '@/components/ui/BotonTabCentral';
+import { IndicadorTabs } from '@/components/ui/IndicadorTabs';
+import { PALETA } from '@/constants/theme';
 
 /**
  * Navegación inferior del área autenticada.
@@ -18,18 +24,22 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#FF9D5C',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: PALETA.accent[600],
+        tabBarInactiveTintColor: PALETA.gris[400],
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopColor: '#F3F4F6',
+          backgroundColor: PALETA.blanco,
+          borderTopColor: PALETA.gris[100],
           height: 64 + paddingBottom,
           paddingTop: 8,
           paddingBottom,
           overflow: 'visible',
         },
         tabBarItemStyle: { paddingTop: 2 },
+        tabBarBackground: () => <IndicadorTabs />,
         tabBarLabelStyle: { fontSize: 12, fontWeight: '500', paddingTop: 2, paddingBottom: 0 },
+        // Sin ripple: el cambio de color de la pestaña activa ya es feedback suficiente, y
+        // el de Android es `borderless` y sin radio, así que se derramaba fuera de la barra.
+        tabBarButton: (props) => <PlatformPressable {...props} pressColor="transparent" />,
       }}
     >
       <Tabs.Screen

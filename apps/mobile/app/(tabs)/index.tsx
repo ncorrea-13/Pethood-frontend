@@ -1,158 +1,80 @@
-/** Home autenticada — acceso visual a las secciones principales. */
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter, type Href } from 'expo-router';
-import {
-  ImageBackground,
-  type ImageSourcePropType,
-  Pressable,
-  Text,
-  View,
-} from 'react-native';
+/**
+ * Home autenticada — grilla de acceso a las secciones principales.
+ *
+ * Tiene dos vistas con la misma estética y distintas secciones: la del adoptante y la del
+ * refugio. Cuál se muestra sale del interruptor de Perfil, no de esta pantalla.
+ */
+import { useRouter } from 'expo-router';
+import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { TarjetaAcceso } from '@/components/home/TarjetaAcceso';
+import { BotonCircular } from '@/components/ui/BotonCircular';
+import { ACCESOS_ADOPTANTE, ACCESOS_REFUGIO } from '@/constants/home';
 import { useSesion } from '@/hooks/useSesion';
-
-type NombreIcono = keyof typeof Ionicons.glyphMap;
-
-interface TarjetaHome {
-  titulo: string;
-  cta: string;
-  icono: NombreIcono;
-  overlay: string;
-  imagen: ImageSourcePropType;
-  /** Destino de la tarjeta. Sin esto queda inerte, hasta que exista la pantalla. */
-  destino?: Href;
-}
-
-const TARJETAS: TarjetaHome[] = [
-  {
-    titulo: '¿Viste a alguna de estas mascotas?',
-    cta: 'Ver perdidos →',
-    icono: 'search',
-    overlay: 'rgba(176, 62, 48, 0.52)',
-    imagen: {
-      uri: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=900&q=80',
-    },
-  },
-  {
-    titulo: 'Solicitudes abiertas',
-    cta: 'Ver todas →',
-    icono: 'document-text-outline',
-    overlay: 'rgba(36, 78, 130, 0.58)',
-    imagen: {
-      uri: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=900&q=80',
-    },
-  },
-  {
-    titulo: '¿Estás buscando una nueva mascota?',
-    cta: 'Adoptar →',
-    icono: 'heart-outline',
-    overlay: 'rgba(166, 96, 42, 0.55)',
-    imagen: {
-      uri: 'https://images.unsplash.com/photo-1552053831-71594a27632d?w=900&q=80',
-    },
-    destino: '/(tabs)/adoptar',
-  },
-  {
-    titulo: 'Ayudanos con estas causas',
-    cta: 'Ver campañas →',
-    icono: 'heart-circle-outline',
-    overlay: 'rgba(46, 96, 58, 0.55)',
-    imagen: {
-      uri: 'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=900&q=80',
-    },
-  },
-];
-
-function saludoSegunHora(): string {
-  const hora = new Date().getHours();
-  if (hora < 13) return 'Buenos días';
-  if (hora < 20) return 'Buenas tardes';
-  return 'Buenas noches';
-}
-
-function TarjetaAcceso({ tarjeta, onPress }: { tarjeta: TarjetaHome; onPress?: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${tarjeta.titulo} ${tarjeta.cta}`}
-      // Las tarjetas sin destino todavía no tienen pantalla: se ven, pero no responden.
-      accessibilityState={{ disabled: !onPress }}
-      onPress={onPress}
-      className="min-h-[118px] flex-1 overflow-hidden rounded-[28px] bg-neutral-500 active:opacity-90"
-    >
-      <ImageBackground
-        source={tarjeta.imagen}
-        className="flex-1 justify-end"
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <View className="absolute inset-0" style={{ backgroundColor: tarjeta.overlay }} />
-        <View className="absolute inset-x-0 bottom-0 h-24 bg-black/25" />
-
-        <View className="absolute right-4 top-4 h-9 w-9 items-center justify-center rounded-full bg-white/20">
-          <Ionicons name={tarjeta.icono} size={18} color="#FFFFFF" />
-        </View>
-
-        <View className="px-5 pb-4 pt-10">
-          <Text className="text-[22px] font-bold leading-7 text-white">{tarjeta.titulo}</Text>
-          <Text className="mt-1 text-sm font-medium text-white/90">{tarjeta.cta}</Text>
-        </View>
-      </ImageBackground>
-    </Pressable>
-  );
-}
+import { saludoPara } from '@/lib/saludo';
 
 export default function InicioScreen() {
-  const { usuario } = useSesion();
+  const { usuario, vistaRefugio } = useSesion();
   const router = useRouter();
-  const nombre = usuario?.nombre?.trim();
+
+  const accesos = vistaRefugio ? ACCESOS_REFUGIO : ACCESOS_ADOPTANTE;
+  // Dos filas de dos: la grilla del diseño, armada con flex para que las tarjetas se
+  // repartan el alto que sobra entre el encabezado y la barra inferior.
+  const filas = [accesos.slice(0, 2), accesos.slice(2)];
 
   return (
-    <View className="flex-1 bg-pethood-beige">
+    <View className="flex-1 bg-organic-bg">
       <SafeAreaView className="flex-1" edges={['top']}>
-        <View className="flex-row items-start justify-between px-5 pb-3 pt-2">
-          <View className="flex-1 pr-3">
-            <Text className="text-[34px] font-bold leading-10 text-pethood-orange">PetHood</Text>
-            <Text className="mt-0.5 text-base text-gray-400">
-              {nombre ? `${saludoSegunHora()}, ${nombre}` : saludoSegunHora()}
+        <View className="flex-row items-start justify-between gap-3 px-[22px] pb-2 pt-2">
+          <View className="flex-1">
+            <Text className="font-titulo text-[27px] leading-[27px] text-organic-accent-600">
+              PetHood
             </Text>
+            {vistaRefugio ? (
+              <Text className="mt-[5px] font-cuerpo-semi text-[15px] text-organic-neutral-700">
+                {nombreVisible(usuario?.nombre, usuario?.apellido)}
+              </Text>
+            ) : (
+              <Text className="mt-[5px] font-cuerpo text-[13.5px] text-organic-neutral-700">
+                {saludoPara(usuario?.nombre)}
+              </Text>
+            )}
           </View>
 
-          <View className="flex-row items-center gap-3 pt-2">
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Favoritos"
-              onPress={() => router.push('/favoritos')}
-              className="h-10 w-10 items-center justify-center rounded-full bg-white active:opacity-80"
-            >
-              <Ionicons name="heart" size={22} color="#FF9D5C" />
-            </Pressable>
-
-            <View
-              accessibilityRole="switch"
-              accessibilityState={{ checked: false, disabled: true }}
-              accessibilityLabel="Modo refugio, no disponible todavía"
-              className="flex-row items-center gap-2 opacity-40"
-            >
-              <Text className="text-sm text-gray-500">Refugio</Text>
-              <View className="h-7 w-12 justify-center rounded-full bg-gray-300 px-0.5">
-                <View className="h-6 w-6 self-start rounded-full bg-white shadow-sm" />
-              </View>
-            </View>
+          <View className="flex-row items-center gap-2">
+            {/* El refugio no adopta: su encabezado no lleva favoritos. */}
+            {vistaRefugio ? null : (
+              <BotonCircular
+                icono="heart-outline"
+                etiqueta="Favoritos"
+                onPress={() => router.push('/favoritos')}
+              />
+            )}
+            {/* Todavía no hay pantalla de notificaciones: se ve, pero no navega. */}
+            <BotonCircular icono="notifications-outline" etiqueta="Notificaciones" />
           </View>
         </View>
 
-        <View className="flex-1 gap-3 px-5 pb-3">
-          {TARJETAS.map((tarjeta) => (
-            <TarjetaAcceso
-              key={tarjeta.cta}
-              tarjeta={tarjeta}
-              onPress={tarjeta.destino ? () => router.push(tarjeta.destino!) : undefined}
-            />
+        <View className="flex-1 gap-[14px] px-[22px] pb-4">
+          {filas.map((fila) => (
+            <View key={fila[0].titulo} className="flex-1 flex-row gap-[14px]">
+              {fila.map((acceso) => (
+                <TarjetaAcceso
+                  key={acceso.titulo}
+                  acceso={acceso}
+                  onPress={acceso.destino ? () => router.push(acceso.destino!) : undefined}
+                />
+              ))}
+            </View>
           ))}
         </View>
       </SafeAreaView>
     </View>
   );
+}
+
+/** En la vista de refugio el encabezado identifica la cuenta en vez de saludar. */
+function nombreVisible(nombre?: string, apellido?: string): string {
+  return [nombre, apellido].filter(Boolean).join(' ').trim() || 'Mi refugio';
 }

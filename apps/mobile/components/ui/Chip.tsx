@@ -8,6 +8,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 
+import { PALETA } from '@/constants/theme';
+
 export type VarianteChip =
   /** Etiqueta informativa sobre fondo claro. */
   | 'suave'
@@ -30,8 +32,14 @@ const ESTILOS: Record<VarianteChip, { activa: EstiloChip; inactiva: EstiloChip }
     inactiva: { contenedor: 'bg-orange-50', texto: 'text-pethood-orange-dark font-medium' },
   },
   'sobre-imagen': {
-    activa: { contenedor: 'bg-white/25', texto: 'text-white font-medium' },
-    inactiva: { contenedor: 'bg-white/25', texto: 'text-white font-medium' },
+    activa: {
+      contenedor: 'border border-white/35 bg-white/[0.18]',
+      texto: 'text-white font-cuerpo-semi',
+    },
+    inactiva: {
+      contenedor: 'border border-white/35 bg-white/[0.18]',
+      texto: 'text-white font-cuerpo-semi',
+    },
   },
   seleccion: {
     activa: {
@@ -59,7 +67,7 @@ const TAMANIOS: Record<VarianteChip, string> = {
 
 const TAMANIOS_TEXTO: Record<VarianteChip, string> = {
   suave: 'text-[13px]',
-  'sobre-imagen': 'text-[11px]',
+  'sobre-imagen': 'text-[11.5px]',
   seleccion: 'text-sm',
   multiple: 'text-sm',
 };
@@ -93,7 +101,7 @@ export function Chip({
   const contenido = (
     <>
       {variante === 'multiple' && activa ? (
-        <Ionicons name="checkmark" size={13} color="#E0742E" />
+        <Ionicons name="checkmark" size={13} color={PALETA.pethood.naranjaIntensa} />
       ) : null}
       {texto}
     </>

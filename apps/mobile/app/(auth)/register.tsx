@@ -17,6 +17,7 @@ import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { FechaNacimientoPicker } from '@/components/FechaNacimientoPicker';
 import { useToast } from '@/components/feedback/Toast';
+import { PALETA } from '@/constants/theme';
 import {
   enmascararFechaNacimiento,
   fechaADdMmAaaa,
@@ -249,7 +250,7 @@ export default function RegisterScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Volver"
               >
-                <Ionicons name="arrow-back" size={22} color="#374151" />
+                <Ionicons name="arrow-back" size={22} color={PALETA.gris[700]} />
               </Pressable>
               <Text className="text-2xl font-bold text-pethood-orange">Crear cuenta</Text>
             </View>
@@ -275,11 +276,11 @@ export default function RegisterScreen() {
                   </View>
                 ) : (
                   <View className="h-28 w-28 items-center justify-center rounded-full border border-gray-200 bg-white">
-                    <Ionicons name="camera-outline" size={36} color="#FF7A45" />
+                    <Ionicons name="camera-outline" size={36} color={PALETA.pethood.naranja} />
                   </View>
                 )}
                 <View className="absolute bottom-0 right-0 h-8 w-8 items-center justify-center rounded-full bg-pethood-orange">
-                  <Ionicons name={foto ? 'pencil' : 'add'} size={16} color="#FFFFFF" />
+                  <Ionicons name={foto ? 'pencil' : 'add'} size={16} color={PALETA.blanco} />
                 </View>
               </Pressable>
               <Text className="mt-2 text-sm text-gray-500">Foto de perfil (opcional)</Text>
@@ -376,7 +377,7 @@ export default function RegisterScreen() {
               inputMode="numeric"
               maxLength={10}
               autoCorrect={false}
-              rightIcon={<Ionicons name="calendar-outline" size={22} color="#FF7A45" />}
+              rightIcon={<Ionicons name="calendar-outline" size={22} color={PALETA.pethood.naranja} />}
               onRightIconPress={abrirCalendario}
               required
             />
@@ -396,7 +397,7 @@ export default function RegisterScreen() {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color="#9CA3AF"
+                  color={PALETA.gris[400]}
                 />
               }
               onRightIconPress={() => setShowPassword((prev) => !prev)}
@@ -423,7 +424,7 @@ export default function RegisterScreen() {
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color="#9CA3AF"
+                  color={PALETA.gris[400]}
                 />
               }
               onRightIconPress={() => setShowConfirmPassword((prev) => !prev)}

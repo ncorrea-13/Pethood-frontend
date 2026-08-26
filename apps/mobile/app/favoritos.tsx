@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EstadoCargando, EstadoError, EstadoVacio } from '@/components/feedback/EstadosPantalla';
 import { useToast } from '@/components/feedback/Toast';
 import { EstadoMascotaBadge } from '@/components/ui/EstadoMascotaBadge';
+import { PALETA } from '@/constants/theme';
 import { urlAbsoluta } from '@/services/api';
 import {
   agregarFavorito,
@@ -88,7 +89,7 @@ function TarjetaFavorito({ mascota, onQuitar }: TarjetaFavoritoProps) {
             <Image source={{ uri: foto }} className="h-full w-full" resizeMode="cover" />
           ) : (
             <View className="h-full w-full items-center justify-center">
-              <Ionicons name="paw-outline" size={28} color="#9CA3AF" />
+              <Ionicons name="paw-outline" size={28} color={PALETA.gris[400]} />
             </View>
           )}
 
@@ -102,7 +103,7 @@ function TarjetaFavorito({ mascota, onQuitar }: TarjetaFavoritoProps) {
             hitSlop={10}
             className="absolute right-1.5 top-1.5 h-7 w-7 items-center justify-center rounded-full bg-white/90 active:opacity-70"
           >
-            <Ionicons name="heart" size={15} color="#FF9D5C" />
+            <Ionicons name="heart" size={15} color={PALETA.pethood.naranja} />
           </Pressable>
         </View>
 
@@ -259,7 +260,7 @@ export default function FavoritosScreen() {
             hitSlop={10}
             className="h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white active:opacity-70"
           >
-            <Ionicons name="arrow-back" size={18} color="#6b6456" />
+            <Ionicons name="arrow-back" size={18} color={PALETA.grisCalido[700]} />
           </Pressable>
 
           <View>
@@ -304,7 +305,7 @@ export default function FavoritosScreen() {
                   setRefrescando(true);
                   void cargar();
                 }}
-                tintColor="#FF9D5C"
+                tintColor={PALETA.pethood.naranja}
               />
             }
           />

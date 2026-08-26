@@ -29,6 +29,7 @@ import { TextAreaField } from '@/components/ui/TextAreaField';
 import { TextField } from '@/components/ui/TextField';
 import { ToggleField } from '@/components/ui/ToggleField';
 import { estiloDeEstado } from '@/constants/EstadosMascota';
+import { PALETA } from '@/constants/theme';
 import { crearPublicacion, listarMisMascotas, type Mascota } from '@/services/mascotas';
 import { LIMITES } from '@/shared/validation/limits';
 import { validarTexto } from '@/shared/validation/text';
@@ -189,7 +190,7 @@ export default function CrearPublicacionScreen() {
             hitSlop={8}
             className="h-10 w-10 items-center justify-center rounded-full bg-white active:opacity-80"
           >
-            <Ionicons name="chevron-back" size={20} color="#4B5563" />
+            <Ionicons name="chevron-back" size={20} color={PALETA.gris[600]} />
           </Pressable>
 
           <Text className="text-2xl font-bold text-pethood-orange">Poner en adopción</Text>

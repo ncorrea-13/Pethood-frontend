@@ -17,6 +17,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SeccionTitulada } from '@/components/ui/SeccionTitulada';
 import { SelectorChips, type OpcionSelector } from '@/components/ui/SelectorChips';
 import { ToggleField } from '@/components/ui/ToggleField';
+import { PALETA } from '@/constants/theme';
 import { listarEspecies, type OpcionCatalogo } from '@/services/catalogos';
 import type { Genero, Tamanio } from '@/services/mascotas';
 import {
@@ -99,7 +100,7 @@ export function FiltrosAdopcionModal({
                 hitSlop={10}
                 className="h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white active:opacity-70"
               >
-                <Ionicons name="arrow-back" size={18} color="#6b6456" />
+                <Ionicons name="arrow-back" size={18} color={PALETA.grisCalido[700]} />
               </Pressable>
 
               <Text className="text-xl font-bold text-pethood-orange">Filtros</Text>

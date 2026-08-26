@@ -1,6 +1,8 @@
 /** Interruptor para un sí/no, con la etiqueta a la izquierda. */
 import { Switch, Text, View } from 'react-native';
 
+import { PALETA } from '@/constants/theme';
+
 interface ToggleFieldProps {
   label: string;
   valor: boolean;
@@ -18,9 +20,9 @@ export function ToggleField({ label, valor, onChange }: ToggleFieldProps) {
         value={valor}
         onValueChange={onChange}
         accessibilityLabel={label}
-        trackColor={{ false: '#E5E7EB', true: '#FF9D5C' }}
-        thumbColor="#FFFFFF"
-        ios_backgroundColor="#E5E7EB"
+        trackColor={{ false: PALETA.gris[200], true: PALETA.pethood.naranja }}
+        thumbColor={PALETA.blanco}
+        ios_backgroundColor={PALETA.gris[200]}
       />
     </View>
   );

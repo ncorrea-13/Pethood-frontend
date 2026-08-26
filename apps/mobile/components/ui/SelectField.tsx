@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { FlatList, Modal, Pressable, Text } from 'react-native';
 import { claseValor, FormField } from './FormField';
+import { PALETA } from '@/constants/theme';
 
 export interface OpcionSelect<T> {
   valor: T;
@@ -62,7 +63,7 @@ export function SelectField<T extends string | number>({
         >
           {seleccionada?.etiqueta ?? textoVacio}
         </Text>
-        <Ionicons name="chevron-down" size={18} color={deshabilitado ? '#D1D5DB' : '#9CA3AF'} />
+        <Ionicons name="chevron-down" size={18} color={deshabilitado ? PALETA.gris[300] : PALETA.gris[400]} />
       </Pressable>
 
       <Modal
@@ -109,7 +110,7 @@ export function SelectField<T extends string | number>({
                     >
                       {item.etiqueta}
                     </Text>
-                    {activa ? <Ionicons name="checkmark" size={20} color="#FF9D5C" /> : null}
+                    {activa ? <Ionicons name="checkmark" size={20} color={PALETA.pethood.naranja} /> : null}
                   </Pressable>
                 );
               }}

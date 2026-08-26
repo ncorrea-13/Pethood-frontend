@@ -1,3 +1,5 @@
+const { PALETA, FUENTES } = require('./constants/theme');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -7,15 +9,30 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      // Paleta tomada del diseño de referencia (source/ en la raíz del proyecto).
       colors: {
+        // Paleta clásica (login, formularios, listados). Los hex viven en constants/theme.js.
         pethood: {
-          orange: '#FF9D5C',
-          'orange-dark': '#FF8A3D', // estado presionado
-          beige: '#FFF5ED', // fondo de pantallas
-          'beige-dark': '#F5F1E8', // fin del degradado de fondo
-          input: '#FAFAFA', // fondo de los campos de formulario
+          orange: PALETA.pethood.naranja,
+          'orange-dark': PALETA.pethood.naranjaOscuro,
+          // Mismo fondo que Inicio: una sola paleta de fondo en toda la app.
+          beige: PALETA.bg,
+          'beige-dark': PALETA.pethood.beigeOscuro,
+          input: PALETA.pethood.input,
         },
+        // Sistema Organic: paleta del rediseño (Inicio, barra inferior).
+        organic: {
+          bg: PALETA.bg,
+          surface: PALETA.surface,
+          accent: PALETA.accent,
+          calido: PALETA.calido,
+          neutral: PALETA.neutral,
+        },
+      },
+      fontFamily: {
+        titulo: [FUENTES.titulo],
+        cuerpo: [FUENTES.cuerpo],
+        'cuerpo-semi': [FUENTES.cuerpoSemi],
+        'cuerpo-bold': [FUENTES.cuerpoBold],
       },
     },
   },

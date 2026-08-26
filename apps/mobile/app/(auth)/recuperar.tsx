@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
+import { PALETA } from '@/constants/theme';
 import { validarEmail } from '@/lib/validacionRegistro';
 import { ApiError } from '@/services/api';
 import { solicitarRecuperacion } from '@/services/auth';
@@ -70,7 +71,7 @@ export default function RecuperarScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Volver"
               >
-                <Ionicons name="arrow-back" size={22} color="#374151" />
+                <Ionicons name="arrow-back" size={22} color={PALETA.gris[700]} />
               </Pressable>
               <Text className="text-2xl font-bold text-pethood-orange">Recuperar contraseña</Text>
             </View>

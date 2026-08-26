@@ -2,6 +2,8 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import type { ReactNode } from 'react';
 import type { TextInputProps } from 'react-native';
 
+import { PALETA } from '@/constants/theme';
+
 export interface CustomInputProps extends TextInputProps {
   label: string;
   error?: string;
@@ -44,7 +46,7 @@ export function CustomInput({
 
         <TextInput
           className={`flex-1 py-3.5 text-base text-gray-900 ${className}`}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={PALETA.gris[400]}
           accessibilityLabel={required ? `${label}, obligatorio` : label}
           {...textInputProps}
         />

@@ -15,6 +15,7 @@ import { CustomButton } from '@/components/CustomButton';
 import { CustomInput } from '@/components/CustomInput';
 import { GoogleLoginButton } from '@/components/GoogleLoginButton';
 import { PetHoodLogo } from '@/components/PetHoodLogo';
+import { PALETA } from '@/constants/theme';
 import { useSesion } from '@/hooks/useSesion';
 import { validarEmail, validarPassword } from '@/lib/validacionRegistro';
 import { ApiError } from '@/services/api';
@@ -130,7 +131,7 @@ export default function LoginScreen() {
                   <Ionicons
                     name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                     size={22}
-                    color="#9CA3AF"
+                    color={PALETA.gris[400]}
                   />
                 }
                 onRightIconPress={() => setShowPassword((prev) => !prev)}

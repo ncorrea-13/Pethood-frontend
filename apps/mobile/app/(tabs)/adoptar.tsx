@@ -23,6 +23,8 @@ import {
   EstadoVacio,
 } from '@/components/feedback/EstadosPantalla';
 import { useToast } from '@/components/feedback/Toast';
+import { BotonCircular } from '@/components/ui/BotonCircular';
+import { PALETA } from '@/constants/theme';
 import { agregarFavorito } from '@/services/favoritos';
 import {
   contarFiltrosActivos,
@@ -160,26 +162,26 @@ export default function AdoptarScreen() {
   const mazoVacio = publicaciones.length === 0;
 
   return (
-    <View className="flex-1 bg-pethood-beige">
+    <View className="flex-1 bg-organic-bg">
       <SafeAreaView className="flex-1" edges={['top']}>
-        <View className="flex-row items-center justify-between border-b border-gray-200 bg-white/85 px-4 py-2.5">
-          <Text className="text-xl font-bold text-pethood-orange">Adoptar</Text>
+        <View className="flex-row items-center justify-between gap-3 px-[22px] pb-3.5 pt-2">
+          <Text className="font-titulo text-[27px] leading-[27px] text-organic-accent-600">
+            Adoptar
+          </Text>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Filtros de búsqueda"
-            onPress={() => setModalFiltros(true)}
-            hitSlop={10}
-            className="active:opacity-70"
-          >
-            <Ionicons name="options-outline" size={24} color="#8a8170" />
-
-            {filtrosActivos > 0 ? (
-              <View className="absolute -right-1.5 -top-1 h-4 min-w-4 items-center justify-center rounded-full bg-pethood-orange px-1">
-                <Text className="text-[10px] font-bold text-white">{filtrosActivos}</Text>
-              </View>
-            ) : null}
-          </Pressable>
+          <View className="flex-row items-center gap-2">
+            <BotonCircular
+              icono="heart-outline"
+              etiqueta="Favoritos"
+              onPress={() => router.push('/favoritos')}
+            />
+            <BotonCircular
+              icono="options-outline"
+              etiqueta="Filtros de búsqueda"
+              onPress={() => setModalFiltros(true)}
+              contador={filtrosActivos}
+            />
+          </View>
         </View>
 
         {cargando ? (
@@ -209,7 +211,7 @@ export default function AdoptarScreen() {
           </EstadoVacio>
         ) : (
           <>
-            <View className="flex-1 px-4 pb-2 pt-3.5">
+            <View className="flex-1 px-[22px]">
               <PilaAdopcion
                 ref={pila}
                 publicaciones={publicaciones}
@@ -218,23 +220,40 @@ export default function AdoptarScreen() {
               />
             </View>
 
-            <View className="flex-row items-center justify-center gap-6 pb-3 pt-1">
+            <View className="flex-row items-center justify-center gap-[26px] pb-2 pt-5">
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="No me interesa"
                 onPress={() => pila.current?.rechazar()}
-                className="h-14 w-14 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm active:opacity-80"
+                className="h-[58px] w-[58px] items-center justify-center rounded-full border active:opacity-80"
+                style={{
+                  backgroundColor: PALETA.neutral[100],
+                  borderColor: PALETA.neutral[300],
+                  shadowColor: PALETA.neutral[900],
+                  shadowOpacity: 0.14,
+                  shadowRadius: 2,
+                  shadowOffset: { width: 0, height: 1 },
+                  elevation: 2,
+                }}
               >
-                <Ionicons name="close" size={28} color="#9a9286" />
+                <Ionicons name="close" size={25} color={PALETA.neutral[700]} />
               </Pressable>
 
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Guardar en favoritos"
                 onPress={() => pila.current?.guardar()}
-                className="h-16 w-16 items-center justify-center rounded-full bg-pethood-orange shadow-md active:bg-pethood-orange-dark"
+                className="h-[70px] w-[70px] items-center justify-center rounded-full active:opacity-90"
+                style={{
+                  backgroundColor: PALETA.accent[600],
+                  shadowColor: PALETA.accent[800],
+                  shadowOpacity: 0.3,
+                  shadowRadius: 18,
+                  shadowOffset: { width: 0, height: 8 },
+                  elevation: 8,
+                }}
               >
-                <Ionicons name="heart" size={32} color="#FFFFFF" />
+                <Ionicons name="heart" size={30} color={PALETA.blanco} />
               </Pressable>
             </View>
           </>

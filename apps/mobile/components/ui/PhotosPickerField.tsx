@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { elegirArchivosWeb } from '@/lib/elegirImagen';
 import { LIMITES } from '../../shared/validation/limits';
+import { PALETA } from '@/constants/theme';
 
 export interface FotoElegida {
   uri: string;
@@ -153,10 +154,10 @@ export function PhotosPickerField({ fotos, onChange, maximo, error }: PhotosPick
           }`}
         >
           {cargando ? (
-            <ActivityIndicator color="#FF9D5C" />
+            <ActivityIndicator color={PALETA.pethood.naranja} />
           ) : (
             <>
-              <Ionicons name="camera-outline" size={28} color="#FF9D5C" />
+              <Ionicons name="camera-outline" size={28} color={PALETA.pethood.naranja} />
               <Text className="mt-1.5 text-sm font-medium text-gray-500">Agregar fotos</Text>
               <Text className="mt-0.5 text-xs text-gray-400">Hasta {maximo}</Text>
             </>
@@ -183,7 +184,7 @@ export function PhotosPickerField({ fotos, onChange, maximo, error }: PhotosPick
                     hitSlop={6}
                     className="absolute right-1.5 top-1.5 h-7 w-7 items-center justify-center rounded-full bg-black/50 active:opacity-80"
                   >
-                    <Ionicons name="close" size={16} color="#FFFFFF" />
+                    <Ionicons name="close" size={16} color={PALETA.blanco} />
                   </Pressable>
                 </View>
 
@@ -198,7 +199,7 @@ export function PhotosPickerField({ fotos, onChange, maximo, error }: PhotosPick
                       indice === 0 ? 'opacity-30' : 'active:opacity-70'
                     }`}
                   >
-                    <Ionicons name="chevron-back" size={16} color="#6B7280" />
+                    <Ionicons name="chevron-back" size={16} color={PALETA.gris[500]} />
                   </Pressable>
 
                   <Pressable
@@ -211,7 +212,7 @@ export function PhotosPickerField({ fotos, onChange, maximo, error }: PhotosPick
                       indice === fotos.length - 1 ? 'opacity-30' : 'active:opacity-70'
                     }`}
                   >
-                    <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+                    <Ionicons name="chevron-forward" size={16} color={PALETA.gris[500]} />
                   </Pressable>
                 </View>
               </View>
@@ -226,10 +227,10 @@ export function PhotosPickerField({ fotos, onChange, maximo, error }: PhotosPick
                 className="mx-1 h-32 w-32 items-center justify-center rounded-2xl border-2 border-dashed border-pethood-orange/40 bg-white/60"
               >
                 {cargando ? (
-                  <ActivityIndicator color="#FF9D5C" />
+                  <ActivityIndicator color={PALETA.pethood.naranja} />
                 ) : (
                   <>
-                    <Ionicons name="add" size={26} color="#FF9D5C" />
+                    <Ionicons name="add" size={26} color={PALETA.pethood.naranja} />
                     <Text className="mt-1 text-xs text-gray-500">Agregar</Text>
                   </>
                 )}

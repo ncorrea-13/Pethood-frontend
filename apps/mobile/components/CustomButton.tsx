@@ -5,6 +5,8 @@ import {
   type PressableProps,
 } from 'react-native';
 
+import { PALETA } from '@/constants/theme';
+
 export interface CustomButtonProps extends Omit<PressableProps, 'children'> {
   title: string;
   loading?: boolean;
@@ -50,7 +52,9 @@ export function CustomButton({
       {...pressableProps}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#FF7A45'} />
+        <ActivityIndicator
+          color={variant === 'primary' ? PALETA.blanco : PALETA.pethood.naranja}
+        />
       ) : (
         <Text className={`text-base font-semibold ${textClasses}`}>{title}</Text>
       )}

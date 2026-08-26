@@ -20,6 +20,7 @@ import { Chip } from '@/components/ui/Chip';
 import { EstadoMascotaBadge } from '@/components/ui/EstadoMascotaBadge';
 import { SeccionTitulada } from '@/components/ui/SeccionTitulada';
 import { resumenMascota } from '@/constants/Mascotas';
+import { PALETA } from '@/constants/theme';
 import { agregarFavorito, quitarFavorito } from '@/services/favoritos';
 import { obtenerPublicacion, type PublicacionFeed } from '@/services/publicaciones';
 
@@ -30,7 +31,7 @@ function Vinieta({ texto, icono }: { texto: string; icono: 'checkmark-circle' | 
       <Ionicons
         name={icono}
         size={icono === 'ellipse' ? 7 : 16}
-        color="#FF9D5C"
+        color={PALETA.pethood.naranja}
         style={{ marginTop: icono === 'ellipse' ? 7 : 1 }}
       />
       <Text className="flex-1 text-[15px] leading-6 text-gray-700">{texto}</Text>
@@ -166,7 +167,7 @@ export default function FichaPublicacionScreen() {
               hitSlop={10}
               className="h-10 w-10 items-center justify-center rounded-full bg-white/90 active:opacity-70"
             >
-              <Ionicons name="arrow-back" size={20} color="#3f3a31" />
+              <Ionicons name="arrow-back" size={20} color={PALETA.grisCalido[900]} />
             </Pressable>
 
             <Pressable
@@ -181,7 +182,7 @@ export default function FichaPublicacionScreen() {
               <Ionicons
                 name={publicacion.enFavoritos ? 'heart' : 'heart-outline'}
                 size={20}
-                color="#FF9D5C"
+                color={PALETA.pethood.naranja}
               />
             </Pressable>
           </View>
@@ -203,7 +204,7 @@ export default function FichaPublicacionScreen() {
 
           {publicacion.refugio ? (
             <View className="mt-3 flex-row items-center gap-1.5">
-              <Ionicons name="business-outline" size={14} color="#8a8170" />
+              <Ionicons name="business-outline" size={14} color={PALETA.grisCalido[500]} />
               <Text className="flex-1 text-[13px] text-gray-500">
                 {publicacion.refugio.nombre}
                 {publicacion.ubicacion ? ` · ${publicacion.ubicacion}` : ''}
@@ -211,7 +212,7 @@ export default function FichaPublicacionScreen() {
             </View>
           ) : publicacion.ubicacion ? (
             <View className="mt-3 flex-row items-center gap-1.5">
-              <Ionicons name="location-outline" size={14} color="#8a8170" />
+              <Ionicons name="location-outline" size={14} color={PALETA.grisCalido[500]} />
               <Text className="flex-1 text-[13px] text-gray-500">{publicacion.ubicacion}</Text>
             </View>
           ) : null}

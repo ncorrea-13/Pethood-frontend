@@ -13,6 +13,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
 
+import { PALETA } from '@/constants/theme';
+
 export type TonoDialogo = 'peligro' | 'advertencia';
 
 interface ConfirmDialogProps {
@@ -31,10 +33,15 @@ interface ConfirmDialogProps {
 }
 
 const ESTILOS: Record<TonoDialogo, { icono: keyof typeof Ionicons.glyphMap; color: string; fondo: string; boton: string }> = {
-  peligro: { icono: 'trash-outline', color: '#DC2626', fondo: 'bg-red-50', boton: 'bg-red-600' },
+  peligro: {
+    icono: 'trash-outline',
+    color: PALETA.estado.error,
+    fondo: 'bg-red-50',
+    boton: 'bg-red-600',
+  },
   advertencia: {
     icono: 'alert-circle-outline',
-    color: '#D97706',
+    color: PALETA.estado.advertencia,
     fondo: 'bg-amber-50',
     boton: 'bg-amber-500',
   },
@@ -113,7 +120,7 @@ export function ConfirmDialog({
                   className={`flex-1 items-center justify-center rounded-2xl py-3.5 active:opacity-90 ${estilo.boton} ${cargando ? 'opacity-60' : ''}`}
                 >
                   {cargando ? (
-                    <ActivityIndicator color="#FFFFFF" />
+                    <ActivityIndicator color={PALETA.blanco} />
                   ) : (
                     <Text className="text-base font-semibold text-white">{textoConfirmar}</Text>
                   )}

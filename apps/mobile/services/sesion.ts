@@ -15,6 +15,7 @@ import type { Usuario } from '@/types/auth';
 
 const CLAVE_TOKEN = 'phd_token';
 const CLAVE_USUARIO = 'phd_usuario';
+const CLAVE_VISTA_REFUGIO = 'phd_vista_refugio';
 const ES_WEB = Platform.OS === 'web';
 
 async function leer(clave: string): Promise<string | null> {
@@ -41,6 +42,20 @@ async function borrar(clave: string): Promise<void> {
 /** Quién pertenece a un refugio y, por lo tanto, puede administrarlo. */
 export function esMiembroDeRefugio(usuario: Usuario | null): boolean {
   return Boolean(usuario?.roles.includes('MIEMBRO_REFUGIO'));
+}
+
+/**
+ * Si quien pertenece a un refugio está viendo la app como refugio o como adoptante.
+ *
+ * Se guarda para que la elección sobreviva a cerrar la app: es un modo de trabajo, no algo
+ * que haya que volver a elegir en cada arranque.
+ */
+export async function obtenerVistaRefugio(): Promise<boolean> {
+  return (await leer(CLAVE_VISTA_REFUGIO)) === 'true';
+}
+
+export async function guardarVistaRefugio(activa: boolean): Promise<void> {
+  await escribir(CLAVE_VISTA_REFUGIO, String(activa));
 }
 
 export async function obtenerToken(): Promise<string | null> {
@@ -75,6 +90,8 @@ export async function guardarSesion(token: string, usuario: Usuario): Promise<vo
 export async function borrarSesion(): Promise<void> {
   await borrar(CLAVE_TOKEN);
   await borrar(CLAVE_USUARIO);
+  // Si no, quien entra después en el mismo dispositivo arranca en la vista del anterior.
+  await borrar(CLAVE_VISTA_REFUGIO);
 }
 
 type ListenerSesionInvalida = () => void;

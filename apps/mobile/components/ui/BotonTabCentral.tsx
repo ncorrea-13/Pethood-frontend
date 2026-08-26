@@ -21,13 +21,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-const AMARILLO = '#E8C04A';
-const AMARILLO_PRESIONADO = '#C9A233';
+import { PALETA } from '@/constants/theme';
 
 const DIAMETRO = 64;
 
-/** Cuánto sobresale por encima de la barra. */
-const ELEVACION = 12;
+/**
+ * Cuánto sobresale por encima de la barra. Lo suficiente para que el círculo tape la
+ * barrita del indicador, que corre por el borde superior: con menos, las puntas de la
+ * barrita asoman por los costados del círculo.
+ */
+const ELEVACION = 18;
 
 interface BotonTabCentralProps {
   icono: keyof typeof Ionicons.glyphMap;
@@ -42,7 +45,11 @@ export function BotonTabCentral({ icono, etiqueta, activo, onPress }: BotonTabCe
 
   const estilo = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(presion.value, [0, 1], [1, 0.88]) }],
-    backgroundColor: interpolateColor(presion.value, [0, 1], [AMARILLO, AMARILLO_PRESIONADO]),
+    backgroundColor: interpolateColor(
+      presion.value,
+      [0, 1],
+      [PALETA.tabCentral.amarillo, PALETA.tabCentral.amarilloPresionado],
+    ),
   }));
 
   return (
@@ -70,8 +77,8 @@ export function BotonTabCentral({ icono, etiqueta, activo, onPress }: BotonTabCe
             alignItems: 'center',
             justifyContent: 'center',
             borderWidth: activo ? 4 : 0,
-            borderColor: '#FFFFFF',
-            shadowColor: AMARILLO,
+            borderColor: PALETA.blanco,
+            shadowColor: PALETA.tabCentral.amarillo,
             shadowOpacity: activo ? 0.55 : 0.3,
             shadowRadius: activo ? 12 : 6,
             shadowOffset: { width: 0, height: activo ? 6 : 3 },
@@ -80,7 +87,7 @@ export function BotonTabCentral({ icono, etiqueta, activo, onPress }: BotonTabCe
           estilo,
         ]}
       >
-        <Ionicons name={icono} size={30} color="#FFFFFF" />
+        <Ionicons name={icono} size={30} color={PALETA.blanco} />
       </Animated.View>
     </Pressable>
   );
