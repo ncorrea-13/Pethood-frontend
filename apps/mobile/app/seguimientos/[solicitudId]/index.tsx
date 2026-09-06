@@ -216,6 +216,15 @@ export default function SeguimientoSolicitudScreen() {
                       ahora={ahora}
                       esAdoptante={esAdoptante}
                       esUltimo={indice === detalle.seguimientos.length - 1}
+                      // HU-9.3. Todos los hitos se abren, no sólo los completados: el
+                      // endpoint también responde por los que no tienen nada cargado, con
+                      // el mensaje que corresponde según si el plazo sigue abierto.
+                      onPress={() =>
+                        router.push({
+                          pathname: '/seguimientos/actualizaciones/[seguimientoId]',
+                          params: { seguimientoId: pedido.id },
+                        })
+                      }
                     />
                   ))}
                 </>

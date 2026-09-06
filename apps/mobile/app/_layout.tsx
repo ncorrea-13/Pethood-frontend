@@ -90,6 +90,8 @@ function RootNavigator() {
           name="seguimientos/[solicitudId]/actualizacion"
           options={{ presentation: 'card' }}
         />
+        {/* HU-9.3. Ruta propia y no hija del expediente: se puede abrir suelta. */}
+        <Stack.Screen name="seguimientos/actualizaciones/[seguimientoId]" />
         <Stack.Screen name="+not-found" />
       </Stack.Protected>
     </Stack>

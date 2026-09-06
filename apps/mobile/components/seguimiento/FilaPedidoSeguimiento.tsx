@@ -9,7 +9,7 @@
  * palabras, para que se entienda igual sin distinguir los tonos.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 
 import { PALETA } from '@/constants/theme';
 import { urlAbsoluta } from '@/services/api';
@@ -88,6 +88,8 @@ interface FilaPedidoSeguimientoProps {
   esAdoptante: boolean;
   /** El último hito no dibuja la línea hacia abajo: no hay nada que encadenar. */
   esUltimo: boolean;
+  /** HU-9.3: abre la actualización en detalle. Sin esto el hito no responde al toque. */
+  onPress?: () => void;
 }
 
 /**
@@ -121,6 +123,7 @@ export function FilaPedidoSeguimiento({
   ahora,
   esAdoptante,
   esUltimo,
+  onPress,
 }: FilaPedidoSeguimientoProps) {
   const estilo = ESTILOS[pedido.estado];
   const contexto = detalleTemporal(pedido, ahora, esAdoptante);
@@ -140,27 +143,42 @@ export function FilaPedidoSeguimiento({
         {esUltimo ? null : <View className="my-1 w-0.5 flex-1 bg-pethood-beige-dark" />}
       </View>
 
-      <View
-        className={`mb-3 flex-1 rounded-2xl p-3 ${estilo.tarjeta}`}
-        style={estilo.sombra ?? undefined}
-      >
-        <Text className="text-sm font-bold leading-5 text-gray-900">{pedido.pregunta}</Text>
+      {/* Tres nodos y no uno solo, a propósito: el `active:opacity-80` del Pressable y la
+          sombra tienen que quedar FUERA de la clase que se alterna con el estado del pedido.
+          Ver `SOMBRA_TARJETA` — mezclarlos ahí es lo que dispara el bug de NativeWind. */}
+      <View className="mb-3 flex-1">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Ver la actualización ${pedido.numero}: ${pedido.pregunta}`}
+          onPress={onPress}
+          disabled={!onPress}
+          className={onPress ? 'active:opacity-80' : ''}
+        >
+          <View
+            className={`rounded-2xl p-3 ${estilo.tarjeta}`}
+            style={estilo.sombra ?? undefined}
+          >
+            <Text className="text-sm font-bold leading-5 text-gray-900">{pedido.pregunta}</Text>
 
-        <Text className="mt-1 text-[11px] text-gray-500">
-          {[contexto, estilo.etiqueta].filter(Boolean).join(' · ')}
-        </Text>
+            <Text className="mt-1 text-[11px] text-gray-500">
+              {[contexto, estilo.etiqueta].filter(Boolean).join(' · ')}
+            </Text>
 
-        {pedido.descripcion ? (
-          <Text className="mt-2 text-sm leading-5 text-gray-700">{pedido.descripcion}</Text>
-        ) : null}
+            {pedido.descripcion ? (
+              <Text className="mt-2 text-sm leading-5 text-gray-700" numberOfLines={3}>
+                {pedido.descripcion}
+              </Text>
+            ) : null}
 
-        {foto ? (
-          <Image
-            source={{ uri: foto }}
-            className="mt-2.5 h-40 w-full rounded-xl bg-pethood-beige-dark"
-            accessibilityLabel={`Foto de prueba del seguimiento ${pedido.numero}`}
-          />
-        ) : null}
+            {foto ? (
+              <Image
+                source={{ uri: foto }}
+                className="mt-2.5 h-40 w-full rounded-xl bg-pethood-beige-dark"
+                accessibilityLabel={`Foto de prueba del seguimiento ${pedido.numero}`}
+              />
+            ) : null}
+          </View>
+        </Pressable>
       </View>
     </View>
   );

@@ -92,6 +92,30 @@ export interface ActualizacionCargada {
   seguimiento: PedidoSeguimiento;
 }
 
+/**
+ * HU-9.3: una actualización puntual, con el contexto para abrirla suelta.
+ *
+ * Trae mascota, adoptante y solicitud porque la pantalla se puede abrir sin haber pasado por
+ * el expediente (desde una notificación): si no, no tendría de dónde sacar de qué animal se
+ * trata.
+ */
+export interface ActualizacionSeguimiento extends PedidoSeguimiento {
+  solicitudId: number;
+  tipo: TipoSeguimiento;
+  rol: RolSeguimiento;
+  mascota: MascotaSeguimiento;
+  adoptante: AdoptanteSeguimiento;
+  /**
+   * Qué mostrar cuando NO hay actualización cargada, con las palabras literales de HU-9.3
+   * ("Aún no se sube actualización de este seguimiento" si el plazo sigue abierto, "No se
+   * subió actualización de seguimiento" si venció). Es `null` en una completada: ahí se
+   * muestran `descripcion` y `fotoUrl`, que en los otros estados vienen siempre en `null`.
+   *
+   * El texto lo arma el servidor y se muestra tal cual: no reconstruirlo en el cliente.
+   */
+  mensaje: string | null;
+}
+
 /** La foto de prueba de vida, ya capturada con la cámara. */
 export interface FotoPrueba {
   uri: string;
@@ -107,6 +131,15 @@ export function listarMisSeguimientos(): Promise<SolicitudEnSeguimiento[]> {
 /** HU-9.2: el historial de una solicitud puntual (GUI-21). */
 export function obtenerSeguimientoDeSolicitud(solicitudId: number): Promise<DetalleSeguimiento> {
   return get(`/solicitudes/${solicitudId}/seguimientos`);
+}
+
+/**
+ * HU-9.3: revisar una actualización puntual. `seguimientoId` es el id del PEDIDO.
+ *
+ * Es sólo lectura: abrirla no marca nada como visto ni cambia el estado del pedido.
+ */
+export function obtenerActualizacion(seguimientoId: number): Promise<ActualizacionSeguimiento> {
+  return get(`/seguimientos/${seguimientoId}`);
 }
 
 /**
