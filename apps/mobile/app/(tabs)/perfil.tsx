@@ -33,6 +33,11 @@ type NombreIcono = keyof typeof Ionicons.glyphMap;
 const MENU: { icono: NombreIcono; label: string; ruta?: Href }[] = [
   { icono: 'paw-outline', label: 'Mis mascotas', ruta: '/(tabs)/mis-mascotas' },
   { icono: 'document-text-outline', label: 'Mis solicitudes' },
+  {
+    icono: 'file-tray-full-outline',
+    label: 'Solicitudes recibidas',
+    ruta: '/solicitudes',
+  },
   { icono: 'heart-outline', label: 'Favoritos', ruta: '/favoritos' },
   { icono: 'heart-circle-outline', label: 'Campañas' },
 ];

@@ -291,15 +291,18 @@ export default function MisMascotasScreen() {
         onCerrar={() => setAEliminar(null)}
       />
 
-      {/* Sin `onConfirmar` el diálogo es informativo: todavía no hay pantalla de solicitudes
-          (módulo 7) a la que mandar al usuario. Cuando exista, acá va un botón
-          "Ver solicitudes" que navegue a resolverlas. */}
       <ConfirmDialog
         visible={bloqueo !== null}
         tono="advertencia"
         titulo="No se puede eliminar todavía"
         mensaje={bloqueo ?? ''}
-        detalle="Vas a poder responderlas desde el módulo de adopciones."
+        detalle="Resolvélas desde la bandeja de solicitudes para poder eliminarla."
+        textoConfirmar="Ver solicitudes"
+        textoCancelar="Entendido"
+        onConfirmar={() => {
+          setBloqueo(null);
+          router.push('/solicitudes');
+        }}
         onCerrar={() => setBloqueo(null)}
       />
     </View>
