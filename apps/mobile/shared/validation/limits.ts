@@ -46,4 +46,8 @@ export const LIMITES = {
     titulo: { min: 1, max: 100 },
     descripcion: { min: 1, max: 1000 },
   },
+
+  solicitud: {
+    comentario: { max: 500 },
+  },
 } as const;

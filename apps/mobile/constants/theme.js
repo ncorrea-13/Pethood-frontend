@@ -89,6 +89,7 @@ const GRIS_CALIDO = {
 const ESTADO = {
   error: '#DC2626',
   advertencia: '#D97706',
+  exito: '#059669',
 };
 
 const BLANCO = '#FFFFFF';
