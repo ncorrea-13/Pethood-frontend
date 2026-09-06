@@ -9,7 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -21,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomButton } from '@/components/CustomButton';
 import { useToast } from '@/components/feedback/Toast';
+import { Avatar } from '@/components/ui/Avatar';
 import { FormCard, FormCardRow } from '@/components/ui/FormCard';
 import { TextField } from '@/components/ui/TextField';
 import { PALETA } from '@/constants/theme';
@@ -56,10 +56,6 @@ interface Errores {
   email?: string;
   telefono?: string;
   ubicacion?: string;
-}
-
-function iniciales(nombre: string, apellido: string): string {
-  return `${nombre.trim().charAt(0)}${apellido.trim().charAt(0)}`.toUpperCase() || '?';
 }
 
 function vacio(): Formulario {
@@ -278,15 +274,12 @@ export default function EditarPerfilScreen() {
                   accessibilityLabel="Cambiar foto de perfil"
                   className="relative"
                 >
-                  {fotoVisible ? (
-                    <Image source={{ uri: fotoVisible }} className="h-28 w-28 rounded-full" />
-                  ) : (
-                    <View className="h-28 w-28 items-center justify-center rounded-full bg-pethood-orange">
-                      <Text className="text-3xl font-bold text-white">
-                        {iniciales(form.nombre, form.apellido)}
-                      </Text>
-                    </View>
-                  )}
+                  <Avatar
+                    uri={fotoVisible}
+                    nombre={form.nombre}
+                    apellido={form.apellido}
+                    tamanio={112}
+                  />
                   <View className="absolute bottom-0 right-0 h-9 w-9 items-center justify-center rounded-full bg-pethood-orange">
                     <Ionicons name="camera" size={16} color={PALETA.blanco} />
                   </View>

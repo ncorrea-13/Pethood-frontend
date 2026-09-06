@@ -8,7 +8,6 @@ import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   Linking,
   Pressable,
   ScrollView,
@@ -18,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useToast } from '@/components/feedback/Toast';
+import { Avatar } from '@/components/ui/Avatar';
 import { BotonCircular } from '@/components/ui/BotonCircular';
 import { Chip } from '@/components/ui/Chip';
 import { SwitchRefugio } from '@/components/ui/SwitchRefugio';
@@ -41,12 +41,6 @@ const MENU: { icono: NombreIcono; label: string; ruta?: Href }[] = [
   { icono: 'heart-outline', label: 'Favoritos', ruta: '/favoritos' },
   { icono: 'heart-circle-outline', label: 'Campañas' },
 ];
-
-function iniciales(nombre?: string, apellido?: string): string {
-  const n = nombre?.trim().charAt(0) ?? '';
-  const a = apellido?.trim().charAt(0) ?? '';
-  return `${n}${a}`.toUpperCase() || '?';
-}
 
 function etiquetaRol(roles: string[], esRefugio: boolean): string {
   if (roles.includes('ADMIN')) return 'Admin';
@@ -149,19 +143,12 @@ export default function PerfilScreen() {
 
             <View className="rounded-[28px] bg-white p-5 shadow-sm">
               <View className="flex-row items-center">
-                {foto ? (
-                  <Image
-                    source={{ uri: foto }}
-                    className="h-20 w-20 rounded-full"
-                    accessibilityLabel="Foto de perfil"
-                  />
-                ) : (
-                  <View className="h-20 w-20 items-center justify-center rounded-full bg-pethood-orange">
-                    <Text className="text-2xl font-bold text-white">
-                      {iniciales(visible?.nombre, visible?.apellido)}
-                    </Text>
-                  </View>
-                )}
+                <Avatar
+                  uri={foto}
+                  nombre={visible?.nombre}
+                  apellido={visible?.apellido}
+                  tamanio={80}
+                />
 
                 <View className="ml-4 flex-1">
                   <Text className="text-xl font-bold text-gray-900">
