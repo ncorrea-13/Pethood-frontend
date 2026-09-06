@@ -51,7 +51,10 @@ export default function InicioScreen() {
                 onPress={() => router.push('/favoritos')}
               />
             )}
-            {/* Todavía no hay pantalla de notificaciones: se ve, pero no navega. */}
+            {/* Todavía no hay pantalla de notificaciones: se ve, pero no navega. Es del
+                Módulo 4, y de ahí cuelga el pendiente de HU-9.3 (entrar a una actualización
+                de seguimiento desde su notificación): ver "Pendientes por dependencias de
+                otros módulos" en el README. */}
             <BotonCircular icono="notifications-outline" etiqueta="Notificaciones" />
           </View>
         </View>

@@ -193,6 +193,20 @@ components/
 
 Ver pantallas GUI-XX y reglas de negocio de esta app en `../../CLAUDE.md`.
 
+## Pendientes por dependencias de otros módulos
+
+Cosas que **no** se pueden terminar en el front todavía porque dependen de módulos del
+backend que aún no existen. No son bugs ni olvidos: están acá para que quien implemente esos
+módulos sepa qué queda por enchufar. Al cerrar cada punto, borrar la fila.
+
+### Módulo 9 — Seguimiento post-adopción (HU-9.1 / 9.2 / 9.3)
+
+| Qué falta | De qué depende | Qué hay hoy |
+| --- | --- | --- |
+| Entrar a una actualización **desde una notificación** (HU-9.3) | **Módulo 4 — Notificaciones.** Doble bloqueo: no existe la pantalla de notificaciones (el botón de la campana en Inicio se ve pero no navega), y además `Notificacion` **no guarda referencia a la entidad que la disparó** — sólo `tipo`, `mensaje`, `leido` y `usuario_id` — así que no hay con qué armar el link directo al seguimiento. La decisión de cómo modelar esa referencia está abierta y documentada en `PetHood_Back/docs/specs/011-seguimiento-post-adopcion.md` §9 (2026-09-03), con tres opciones a resolver en equipo. | El camino largo funciona completo: Perfil → Seguimientos → expediente de la mascota → tocar el hito → actualización. La pantalla de destino ya existe y es deep-linkable (`/seguimientos/actualizaciones/:seguimientoId`), así que cuando el Módulo 4 tenga la referencia alcanza con navegar a esa ruta. |
+| Que aparezca algo en la lista de Seguimientos sin cargar datos a mano | **Módulo de Solicitudes** (crear y aprobar una solicitud de adopción o tránsito). No existe. Un seguimiento sólo nace de una solicitud **aprobada**. | Para probar hay que sembrar solicitudes aprobadas con `PetHood_Back/prisma/seed-adopciones-completas.ts`. Sin eso el listado muestra su estado vacío, que es lo correcto. |
+| Duración real del período de tránsito | El modelo de datos **no tiene la fecha de fin del tránsito** (`Solicitud` sólo guarda `fecha_respuesta`). | El backend asume 180 días en `DIAS_TRANSITO_POR_DEFECTO`. El front no calcula nada de esto: muestra `proximoAviso` y `finalizado` tal como vienen, así que cuando se defina el campo no hay que tocar el front. |
+
 ## Troubleshooting
 
 ### `npm ci` / `npm install` falla por engines

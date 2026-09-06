@@ -82,6 +82,16 @@ function RootNavigator() {
         <Stack.Screen name="publicaciones/[id]" options={{ presentation: 'card' }} />
         <Stack.Screen name="perfil/editar" options={{ presentation: 'card' }} />
         <Stack.Screen name="perfil/password" options={{ presentation: 'card' }} />
+        {/* HU-9.1/HU-9.2. Fuera de las tabs: se entra desde Perfil y el back vuelve al
+            origen real, igual que Favoritos. */}
+        <Stack.Screen name="seguimientos/index" />
+        <Stack.Screen name="seguimientos/[solicitudId]/index" />
+        <Stack.Screen
+          name="seguimientos/[solicitudId]/actualizacion"
+          options={{ presentation: 'card' }}
+        />
+        {/* HU-9.3. Ruta propia y no hija del expediente: se puede abrir suelta. */}
+        <Stack.Screen name="seguimientos/actualizaciones/[seguimientoId]" />
         <Stack.Screen name="+not-found" />
       </Stack.Protected>
     </Stack>
