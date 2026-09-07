@@ -11,11 +11,12 @@
  * - sin `onConfirmar`: un único "Entendido", para informar un bloqueo sin salida.
  */
 import { Ionicons } from '@expo/vector-icons';
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
 
 import { PALETA } from '@/constants/theme';
 
-export type TonoDialogo = 'peligro' | 'advertencia';
+export type TonoDialogo = 'peligro' | 'advertencia' | 'exito';
 
 interface ConfirmDialogProps {
   visible: boolean;
@@ -30,6 +31,8 @@ interface ConfirmDialogProps {
   onConfirmar?: () => void;
   onCerrar: () => void;
   cargando?: boolean;
+  /** Contenido extra entre el detalle y los botones, por ejemplo un campo de comentario. */
+  children?: ReactNode;
 }
 
 const ESTILOS: Record<TonoDialogo, { icono: keyof typeof Ionicons.glyphMap; color: string; fondo: string; boton: string }> = {
@@ -45,6 +48,12 @@ const ESTILOS: Record<TonoDialogo, { icono: keyof typeof Ionicons.glyphMap; colo
     fondo: 'bg-amber-50',
     boton: 'bg-amber-500',
   },
+  exito: {
+    icono: 'checkmark-circle-outline',
+    color: PALETA.estado.exito,
+    fondo: 'bg-emerald-50',
+    boton: 'bg-emerald-600',
+  },
 };
 
 export function ConfirmDialog({
@@ -58,6 +67,7 @@ export function ConfirmDialog({
   onConfirmar,
   onCerrar,
   cargando = false,
+  children,
 }: ConfirmDialogProps) {
   const estilo = ESTILOS[tono];
   const esInformativo = onConfirmar === undefined;
@@ -91,6 +101,8 @@ export function ConfirmDialog({
           {detalle ? (
             <Text className="mt-3 text-center text-sm leading-5 text-gray-500">{detalle}</Text>
           ) : null}
+
+          {children ? <View className="mt-4">{children}</View> : null}
 
           <View className={`mt-6 gap-3 ${esInformativo ? '' : 'flex-row'}`}>
             {esInformativo ? (

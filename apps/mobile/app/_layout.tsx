@@ -80,6 +80,11 @@ function RootNavigator() {
         <Stack.Screen name="publicaciones/crear" options={{ presentation: 'card' }} />
         {/* Se abre tocando una tarjeta del mazo de Adoptar, sin descartarla. */}
         <Stack.Screen name="publicaciones/[id]" options={{ presentation: 'card' }} />
+        {/* GUI-27. Bandeja de quien publicó la mascota (HU-7.4/7.5) — refugio o adoptante
+            particular, no una tab fija: se entra desde el Perfil y desde el bloqueo al
+            eliminar una mascota con solicitudes abiertas. */}
+        <Stack.Screen name="solicitudes" options={{ presentation: 'card' }} />
+        <Stack.Screen name="solicitudes/[id]" options={{ presentation: 'card' }} />
         <Stack.Screen name="perfil/editar" options={{ presentation: 'card' }} />
         <Stack.Screen name="perfil/password" options={{ presentation: 'card' }} />
         {/* HU-9.1/HU-9.2. Fuera de las tabs: se entra desde Perfil y el back vuelve al
