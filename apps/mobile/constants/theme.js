@@ -89,6 +89,11 @@ const GRIS_CALIDO = {
 const ESTADO = {
   error: '#DC2626',
   advertencia: '#D97706',
+  /**
+   * Verde de "En línea" en la cabecera de la conversación (GUI-14). Es el único verde del
+   * diseño y no sale de ninguna rampa: viene tal cual del artboard.
+   */
+  enLinea: '#5BA45B',
 };
 
 const BLANCO = '#FFFFFF';

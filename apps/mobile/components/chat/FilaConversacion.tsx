@@ -26,9 +26,9 @@ interface FilaConversacionProps {
   /** Instante contra el que se calcula el texto relativo. Lo refresca la pantalla. */
   ahora: Date;
   /**
-   * Navegación a la conversación (GUI-14). Todavía no se pasa: abrir la sala es HU-5.2.
-   * Mientras no exista, la fila no da feedback de pulsación — un destello que no lleva a
-   * ningún lado se lee como un bug.
+   * Navegación a la conversación (GUI-14, HU-5.2). Sigue siendo opcional: sin ella la fila
+   * no da feedback de pulsación, porque un destello que no lleva a ningún lado se lee como
+   * un bug.
    */
   onPress?: () => void;
 }

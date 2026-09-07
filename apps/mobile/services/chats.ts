@@ -1,8 +1,8 @@
 /**
- * Chat (HU-5.1 listado de conversaciones). Contrato en
- * `pethood-backend/docs/api-chats.md`.
+ * Chat: listado de conversaciones (HU-5.1) y sala (HU-5.2). Contratos en
+ * `pethood-backend/docs/api-chats.md` y `api-chat-sala.md`.
  */
-import { get } from './api';
+import { adjuntarArchivo, get, post, postFormData, type ArchivoAdjunto } from './api';
 
 /**
  * El otro lado de la conversación, ya resuelto por el backend: el cliente no tiene que
@@ -53,4 +53,92 @@ export interface ListaChats {
  */
 export function listarChats(): Promise<ListaChats> {
   return get('/chats');
+}
+
+// ─────────────── HU-5.2 · Sala de conversación (GUI-14) ───────────────
+
+/**
+ * Un mensaje. **Misma forma en el historial, en la respuesta del envío y en el evento
+ * `chat:mensaje-nuevo`**, así que hay un solo tipo y un solo mapper para los tres.
+ */
+export interface Mensaje {
+  /** Clave de deduplicación contra el broadcast, y cursor de paginación. */
+  id: number;
+  chatId: number;
+  /** Cadena vacía en un mensaje de sólo foto. */
+  contenido: string;
+  /** Ruta relativa: pasarla por `urlAbsoluta`. `null` si el mensaje es sólo texto. */
+  imagenUrl: string | null;
+  /** Id del emisor. El backend NO manda `esMio`: se compara con la sesión. */
+  usuarioId: number;
+  leido: boolean;
+  /** ISO 8601 crudo. La hora la arma `horaVisible`. */
+  fechaAlta: string;
+}
+
+export interface HistorialMensajes {
+  /** DESCENDENTE: `mensajes[0]` es el más reciente. Alimenta una lista invertida tal cual. */
+  mensajes: Mensaje[];
+  hayMas: boolean;
+  /** Id a mandar como `antesDe` para la página siguiente. `null` en el principio del chat. */
+  proximoCursor: number | null;
+}
+
+export interface CabeceraChat {
+  chatId: number;
+  contacto: ContactoChat;
+  /** Snapshot de presencia. A partir de acá lo actualiza el evento `chat:presencia`. */
+  enLinea: boolean;
+}
+
+export interface ResultadoLeidos {
+  chatId: number;
+  /** Siempre 0: sirve para actualizar el ítem del listado sin refetch. */
+  noLeidos: number;
+  /** Cuántos cambiaron de verdad. 0 al reabrir una sala ya leída. */
+  marcados: number;
+}
+
+/** Cabecera de GUI-14: contacto ya resuelto y presencia, sin depender del listado. */
+export function obtenerCabeceraChat(chatId: number): Promise<CabeceraChat> {
+  return get(`/chats/${chatId}`);
+}
+
+/**
+ * Una página del historial. Sin `antesDe` trae la más reciente; con él, la anterior.
+ *
+ * El backend ya devuelve los mensajes ordenados: **no reordenar ni invertir acá**.
+ */
+export function listarMensajes(chatId: number, antesDe?: number): Promise<HistorialMensajes> {
+  const query = antesDe === undefined ? '' : `?antesDe=${antesDe}`;
+  return get(`/chats/${chatId}/mensajes${query}`);
+}
+
+/**
+ * Envía un mensaje. Devuelve el mensaje YA persistido, con su id y su fecha definitivos.
+ *
+ * Va por REST y no por socket: así el envío funciona aunque el websocket esté caído, y la
+ * foto reusa el multipart por XHR que el resto de la app ya usa. Con foto va multipart;
+ * sin foto, JSON — mandar multipart para un texto suelto sería armar un formulario al
+ * pedo.
+ */
+export async function enviarMensaje(
+  chatId: number,
+  contenido: string,
+  foto?: ArchivoAdjunto | null,
+): Promise<Mensaje> {
+  if (!foto) {
+    return post(`/chats/${chatId}/mensajes`, { contenido });
+  }
+
+  const formData = new FormData();
+  formData.append('contenido', contenido);
+  await adjuntarArchivo(formData, 'foto', foto);
+
+  return postFormData(`/chats/${chatId}/mensajes`, formData);
+}
+
+/** Marca leída la conversación entera. Se llama al abrir la sala, no por mensaje visto. */
+export function marcarChatLeido(chatId: number): Promise<ResultadoLeidos> {
+  return post(`/chats/${chatId}/leidos`, {});
 }

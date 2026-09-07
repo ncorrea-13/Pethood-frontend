@@ -7,7 +7,7 @@
  *
  * Sólo lectura: abrir una conversación y enviar mensajes es HU-5.2, y filtrar es HU-5.3.
  */
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, RefreshControl, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -51,6 +51,7 @@ function ListaVacia() {
 
 export default function ChatScreen() {
   const { esRefugio } = useSesion();
+  const router = useRouter();
 
   const [chats, setChats] = useState<Conversacion[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -137,7 +138,16 @@ export default function ChatScreen() {
           <FlatList
             data={chats}
             keyExtractor={(chat) => String(chat.chatId)}
-            renderItem={({ item }) => <FilaConversacion conversacion={item} ahora={ahora} />}
+            renderItem={({ item }) => (
+              <FilaConversacion
+                conversacion={item}
+                ahora={ahora}
+                // HU-5.2: sólo viaja el chatId. El nombre y la foto los resuelve la
+                // cabecera de la sala, para que abrirla desde una notificación o un deep
+                // link no dependa de haber pasado por acá.
+                onPress={() => router.push(`/chats/${item.chatId}`)}
+              />
+            )}
             ListEmptyComponent={ListaVacia}
             contentContainerStyle={vacio ? { flexGrow: 1 } : { paddingVertical: 4 }}
             refreshControl={
