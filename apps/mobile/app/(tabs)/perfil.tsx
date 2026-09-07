@@ -38,6 +38,7 @@ const MENU: { icono: NombreIcono; label: string; ruta?: Href }[] = [
     label: 'Solicitudes recibidas',
     ruta: '/solicitudes',
   },
+  { icono: 'footsteps-outline', label: 'Seguimientos', ruta: '/seguimientos' },
   { icono: 'heart-outline', label: 'Favoritos', ruta: '/favoritos' },
   { icono: 'heart-circle-outline', label: 'Campañas' },
 ];

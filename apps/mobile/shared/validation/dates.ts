@@ -119,6 +119,36 @@ export function tiempoRelativo(fecha: Date, ahora: Date = new Date()): string {
   return `Hace ${dias} ${dias === 1 ? 'día' : 'días'}`;
 }
 
+/**
+ * Lo que falta para una fecha futura, sin preposición: "12 min", "5 horas", "3 días".
+ * Devuelve `null` si la fecha ya pasó, para que quien llama muestre el estado vencido en
+ * lugar de una cuenta regresiva en cero.
+ *
+ * Es el espejo futuro de `tiempoRelativo` y comparte sus tramos. Lo usa el seguimiento
+ * post-adopción (HU-9.1/9.2) para el plazo de 48 h y para el próximo pedido, así que la
+ * unidad más chica sigue siendo el minuto: al plazo le sobra precisión con eso.
+ *
+ * Redondea hacia arriba a propósito: a falta de 90 minutos es más honesto decir "2 horas"
+ * que "1 hora", porque quien lee está calculando cuánto margen le queda.
+ */
+export function tiempoHasta(fecha: Date, ahora: Date = new Date()): string | null {
+  const restante = fecha.getTime() - ahora.getTime();
+
+  if (restante <= 0) return null;
+
+  if (restante < UNA_HORA) {
+    return `${Math.max(1, Math.ceil(restante / UN_MINUTO))} min`;
+  }
+
+  if (restante < UN_DIA) {
+    const horas = Math.ceil(restante / UNA_HORA);
+    return `${horas} ${horas === 1 ? 'hora' : 'horas'}`;
+  }
+
+  const dias = Math.ceil(restante / UN_DIA);
+  return `${dias} ${dias === 1 ? 'día' : 'días'}`;
+}
+
 /** Formato para mostrar al usuario. */
 export function aFechaVisible(fecha: Date): string {
   const dia = String(fecha.getDate()).padStart(2, '0');

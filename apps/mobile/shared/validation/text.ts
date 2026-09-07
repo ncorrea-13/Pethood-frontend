@@ -18,26 +18,40 @@ export function mensajeLongitud(etiqueta: string, min: number, max: number): str
   return `${etiqueta} debe tener entre ${min} y ${max} caracteres`;
 }
 
+export interface OpcionesTexto {
+  min?: number;
+  max: number;
+  etiqueta: string;
+  obligatorio?: boolean;
+  /**
+   * Mensajes a medida, para cuando la HU fija el texto literal que tiene que ver el usuario
+   * (ej. HU-9.1 exige "Completar descripción" y no el genérico "La descripción es
+   * obligatoria"). Solo cambian el texto: la regla que decide si el valor es válido sigue
+   * siendo la de esta función, para que la pantalla nunca tenga que reimplementarla.
+   */
+  errorObligatorio?: string;
+  errorLongitud?: string;
+}
+
 /**
  * Texto con trim previo. Un valor de solo espacios queda vacío; si el campo exige un
  * mínimo de 2 o más, se reporta como longitud inválida y no como campo sin completar,
  * porque para quien lo escribió el campo tenía contenido.
  */
-export function validarTexto(
-  valor: string,
-  opciones: { min?: number; max: number; etiqueta: string; obligatorio?: boolean },
-): string | null {
-  const { min = 0, max, etiqueta, obligatorio = true } = opciones;
+export function validarTexto(valor: string, opciones: OpcionesTexto): string | null {
+  const { min = 0, max, etiqueta, obligatorio = true, errorObligatorio, errorLongitud } = opciones;
   const recortado = valor.trim();
+
+  const porLongitud = errorLongitud ?? mensajeLongitud(etiqueta, min, max);
 
   if (!recortado) {
     if (!obligatorio) return null;
-    if (min >= 2) return mensajeLongitud(etiqueta, min, max);
-    return mensajeObligatorio(etiqueta);
+    if (min >= 2) return porLongitud;
+    return errorObligatorio ?? mensajeObligatorio(etiqueta);
   }
 
   if (recortado.length < min || recortado.length > max) {
-    return mensajeLongitud(etiqueta, min, max);
+    return porLongitud;
   }
 
   return null;
