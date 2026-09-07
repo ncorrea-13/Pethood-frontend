@@ -48,6 +48,8 @@ interface BurbujaMensajeProps {
   /** Sólo en las propias que fallaron. */
   onReintentar?: () => void;
   onDescartar?: () => void;
+  /** Abre la foto a pantalla completa. El visor lo monta la pantalla, no cada burbuja. */
+  onAbrirImagen?: () => void;
 }
 
 /** Hora del mensaje, o el estado mientras todavía no hay una fecha del servidor. */
@@ -97,11 +99,25 @@ function PieBurbuja({ item }: { item: ItemChat }) {
 }
 
 /** Foto del mensaje, con su lugar reservado mientras carga para que la lista no salte. */
-function ImagenMensaje({ uri, subiendo }: { uri: string; subiendo: boolean }) {
+function ImagenMensaje({
+  uri,
+  subiendo,
+  onAbrir,
+}: {
+  uri: string;
+  subiendo: boolean;
+  onAbrir?: () => void;
+}) {
   return (
-    <View
+    <Pressable
+      accessibilityRole="imagebutton"
+      accessibilityLabel="Ver la foto en grande"
+      // Mientras sube no se abre: la foto todavía no es la definitiva y ampliarla mostraría
+      // el archivo local, no lo que quedó guardado.
+      onPress={subiendo ? undefined : onAbrir}
+      disabled={subiendo || !onAbrir}
       style={{ height: ALTO_IMAGEN, borderRadius: RADIO - 6 }}
-      className="mb-1.5 w-full overflow-hidden bg-pethood-beige-dark"
+      className="mb-1.5 w-full overflow-hidden bg-pethood-beige-dark active:opacity-90"
     >
       <Image
         source={{ uri }}
@@ -117,15 +133,19 @@ function ImagenMensaje({ uri, subiendo }: { uri: string; subiendo: boolean }) {
           <ActivityIndicator color={PALETA.blanco} />
         </View>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 
-function Contenido({ item }: { item: ItemChat }) {
+function Contenido({ item, onAbrirImagen }: { item: ItemChat; onAbrirImagen?: () => void }) {
   return (
     <>
       {item.imagen ? (
-        <ImagenMensaje uri={item.imagen} subiendo={item.estado === 'enviando'} />
+        <ImagenMensaje
+          uri={item.imagen}
+          subiendo={item.estado === 'enviando'}
+          onAbrir={onAbrirImagen}
+        />
       ) : null}
 
       {/* Un mensaje puede ser sólo foto: ahí `contenido` viene vacío y no se pinta el texto. */}
@@ -142,7 +162,12 @@ function Contenido({ item }: { item: ItemChat }) {
   );
 }
 
-export function BurbujaMensaje({ item, onReintentar, onDescartar }: BurbujaMensajeProps) {
+export function BurbujaMensaje({
+  item,
+  onReintentar,
+  onDescartar,
+  onAbrirImagen,
+}: BurbujaMensajeProps) {
   const radios = item.esMio
     ? {
         borderTopLeftRadius: RADIO,
@@ -169,11 +194,11 @@ export function BurbujaMensaje({ item, onReintentar, onDescartar }: BurbujaMensa
             end={{ x: 1, y: 1 }}
             style={{ ...radios, ...RELLENO }}
           >
-            <Contenido item={item} />
+            <Contenido item={item} onAbrirImagen={onAbrirImagen} />
           </LinearGradient>
         ) : (
           <View style={{ ...radios, ...RELLENO, ...SOMBRA }} className="bg-white">
-            <Contenido item={item} />
+            <Contenido item={item} onAbrirImagen={onAbrirImagen} />
           </View>
         )}
 

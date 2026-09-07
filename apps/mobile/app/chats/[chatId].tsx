@@ -11,20 +11,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Text, View } from 'react-native';
+import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BarraEscritura } from '@/components/chat/BarraEscritura';
 import { BurbujaMensaje } from '@/components/chat/BurbujaMensaje';
 import { CabeceraConversacion } from '@/components/chat/CabeceraConversacion';
+import { VisorImagen } from '@/components/chat/VisorImagen';
 import { EstadoCargando, EstadoError, EstadoVacio } from '@/components/feedback/EstadosPantalla';
 import { PALETA } from '@/constants/theme';
 import { useSalaChat } from '@/hooks/useSalaChat';
@@ -52,8 +46,36 @@ export default function ConversacionScreen() {
   const chatId = Number(parametro);
 
   const [foto, setFoto] = useState<ArchivoAdjunto | null>(null);
+  /** Foto que se está viendo a pantalla completa, o `null`. Un solo visor para toda la lista. */
+  const [imagenAmpliada, setImagenAmpliada] = useState<string | null>(null);
 
   const sala = useSalaChat(chatId, usuario?.id ?? 0, token);
+
+  /**
+   * Alto del teclado, para levantar la barra de escritura junto con él.
+   *
+   * No se usa `KeyboardAvoidingView`: desde que Expo activa edge-to-edge por defecto en
+   * Android (SDK 54+), la ventana ya NO se redimensiona al abrir el teclado —pasa a ser un
+   * inset— así que el componente no tiene de dónde calcular el desplazamiento y la pantalla
+   * se queda quieta tapando lo que se escribe.
+   *
+   * `useAnimatedKeyboard` lee ese inset directo y anima en el hilo de UI. Está marcado como
+   * deprecado a favor de `react-native-keyboard-controller`, que es la opción recomendada
+   * pero trae un módulo nativo: el equipo prueba con Expo Go y eso obligaría a todos a pasar
+   * a una dev build. Cuando el proyecto migre a dev build, conviene cambiarlo.
+   */
+  const teclado = useAnimatedKeyboard({
+    // Con edge-to-edge las dos barras del sistema son translúcidas y la app dibuja por
+    // debajo. Sin declararlo, el alto del teclado se mide contra una ventana que no es la
+    // real y la barra de escritura queda corrida.
+    isStatusBarTranslucentAndroid: true,
+    isNavigationBarTranslucentAndroid: true,
+  });
+
+  const estiloConTeclado = useAnimatedStyle(() => ({
+    flex: 1,
+    paddingBottom: teclado.height.value,
+  }));
 
   /**
    * Criterio 6: el clip abre el explorador nativo. Se reusa el selector del proyecto, que
@@ -105,6 +127,7 @@ export default function ConversacionScreen() {
           item={item}
           onReintentar={() => sala.reintentar(item.clave)}
           onDescartar={() => sala.descartar(item.clave)}
+          onAbrirImagen={item.imagen ? () => setImagenAmpliada(item.imagen) : undefined}
         />
       </View>
     ),
@@ -126,13 +149,9 @@ export default function ConversacionScreen() {
           onVolver={volver}
         />
 
-        <KeyboardAvoidingView
-          className="flex-1"
-          // En iOS el teclado se superpone y hay que empujar la vista. En Android el
-          // sistema ya redimensiona la ventana (`adjustResize`), así que empujar de nuevo
-          // dejaría un hueco del alto del teclado.
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
+        {/* El padding inferior sigue al teclado, así la barra de escritura sube con él y el
+            último mensaje nunca queda tapado. Vale para las dos plataformas. */}
+        <Animated.View style={estiloConTeclado}>
           {sala.cargando ? (
             <EstadoCargando />
           ) : sala.error ? (
@@ -192,8 +211,12 @@ export default function ConversacionScreen() {
               </Text>
             </View>
           )}
-        </KeyboardAvoidingView>
+        </Animated.View>
       </SafeAreaView>
+
+      {/* Un solo visor para toda la conversación: montar un Modal por burbuja sería un
+          componente por mensaje para algo que sólo se ve de a uno. */}
+      <VisorImagen uri={imagenAmpliada} onCerrar={() => setImagenAmpliada(null)} />
     </View>
   );
 }
