@@ -59,4 +59,17 @@ export const LIMITES = {
   seguimiento: {
     descripcion: { min: 1, max: 1000 },
   },
+
+  /**
+   * Mensaje de chat (HU-5.2). El techo lo fijó el backend, que rechaza con `VALIDACION`
+   * pasado ese largo; acá corta el input antes para que el usuario no escriba de más.
+   *
+   * `min: 0` a propósito: un mensaje puede ser SÓLO foto. Que venga texto o imagen es una
+   * regla del par de campos y la valida el backend, no el largo de uno solo.
+   */
+  mensaje: {
+    contenido: { min: 0, max: 1000 },
+    /** Tamaño de página del historial. El backend acepta hasta 50. */
+    pagina: { porDefecto: 30, maximo: 50 },
+  },
 } as const;

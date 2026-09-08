@@ -97,6 +97,9 @@ function RootNavigator() {
         />
         {/* HU-9.3. Ruta propia y no hija del expediente: se puede abrir suelta. */}
         <Stack.Screen name="seguimientos/actualizaciones/[seguimientoId]" />
+        {/* GUI-14. Fuera de las tabs para que la conversación ocupe la pantalla entera y el
+            back vuelva al listado. Sólo recibe el chatId: el contacto lo trae la API. */}
+        <Stack.Screen name="chats/[chatId]" options={{ presentation: 'card' }} />
         <Stack.Screen name="+not-found" />
       </Stack.Protected>
     </Stack>

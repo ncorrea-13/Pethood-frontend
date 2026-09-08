@@ -149,6 +149,23 @@ export function tiempoHasta(fecha: Date, ahora: Date = new Date()): string | nul
   return `${dias} ${dias === 1 ? 'día' : 'días'}`;
 }
 
+/**
+ * Hora del día en 24 h: "10:30". Es lo que va dentro de la burbuja de un mensaje (GUI-14).
+ *
+ * No se resuelve con `tiempoRelativo`: ese contesta "cuánto hace" y sirve para ordenar una
+ * bandeja de entrada (HU-5.1), mientras que dentro de una conversación lo que importa es a
+ * qué hora se dijo cada cosa.
+ *
+ * Va con `getHours`/`getMinutes` y no con `toLocaleTimeString` porque el formato de éste
+ * depende del locale del dispositivo: en un teléfono en inglés saldría "10:30 AM" y la
+ * burbuja quedaría más ancha de lo que el diseño previó.
+ */
+export function horaVisible(fecha: Date): string {
+  const horas = String(fecha.getHours()).padStart(2, '0');
+  const minutos = String(fecha.getMinutes()).padStart(2, '0');
+  return `${horas}:${minutos}`;
+}
+
 /** Formato para mostrar al usuario. */
 export function aFechaVisible(fecha: Date): string {
   const dia = String(fecha.getDate()).padStart(2, '0');

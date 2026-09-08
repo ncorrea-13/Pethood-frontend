@@ -2,6 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { cerrarSocket } from '@/lib/socketChat';
 import * as authService from '@/services/auth';
 import {
   borrarSesion,
@@ -105,6 +106,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setUsuario(null);
     setVistaRefugioElegida(false);
+    // El socket quedó autenticado en el handshake con un token que ya no vale: no alcanza
+    // con que la pantalla suelte su referencia, hay que cortarlo sí o sí.
+    cerrarSocket();
     await borrarSesion();
     if (tokenActual) {
       await authService.logout(tokenActual).catch(() => undefined);
