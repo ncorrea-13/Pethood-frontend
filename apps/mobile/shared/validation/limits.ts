@@ -32,13 +32,13 @@ export const LIMITES = {
 
   imagen: {
     tamanioMaximoBytes: 5 * 1024 * 1024,
-    formatos: ['image/jpeg', 'image/png', 'image/webp'],
+    formatos: ["image/jpeg", "image/png", "image/webp"],
   },
 
   /** Comprobante de historia clínica: además de imagen, admite pdf (REQUISITOS.md §4). */
   documento: {
     tamanioMaximoBytes: 5 * 1024 * 1024,
-    formatos: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+    formatos: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
   },
 
   /** Sin spec de diseño que fije el número exacto todavía — valores conservadores. */
@@ -47,6 +47,9 @@ export const LIMITES = {
     descripcion: { min: 1, max: 1000 },
   },
 
+  solicitud: {
+    comentario: { max: 500 },
+  },
   /**
    * Seguimiento post-adopción (spec 011). La HU-9.1 pide "descripción larga" sin fijar el
    * número; 1000 es el mismo techo que la descripción de historia clínica, que es el campo

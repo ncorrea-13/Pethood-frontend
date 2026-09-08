@@ -89,9 +89,12 @@ const GRIS_CALIDO = {
 const ESTADO = {
   error: '#DC2626',
   advertencia: '#D97706',
+  exito: '#059669',
   /**
    * Verde de "En línea" en la cabecera de la conversación (GUI-14). Es el único verde del
-   * diseño y no sale de ninguna rampa: viene tal cual del artboard.
+   * diseño y no sale de ninguna rampa: viene tal cual del artboard. No se reusa `exito`
+   * porque no comunica lo mismo: uno es el resultado de una acción, el otro un estado de
+   * presencia, y el día que cambie el verde de los toasts no tiene por qué cambiar éste.
    */
   enLinea: '#5BA45B',
 };
